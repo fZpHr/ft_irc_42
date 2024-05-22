@@ -6,12 +6,18 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/22 15:50:19 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/22 16:50:26 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_IRC_HPP
 # define FT_IRC_HPP
+
+
+# include "Server.hpp"
+# include "Client.hpp"
+
+
 
 /**
  * For debug purposes, change the value to 1 with the following command: make debug
