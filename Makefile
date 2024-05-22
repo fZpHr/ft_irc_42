@@ -14,6 +14,8 @@ NAME	=	ircserv
 
 SRCS	=	srcs/main.cpp \
 			srcs/parsing/handle_input.cpp \
+			srcs/Client.cpp \
+			srcs/Server.cpp \
 
 OBJ_DIR = .o
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))

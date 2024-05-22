@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/22 16:50:26 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/22 17:33:19 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 # define FT_IRC_HPP
 
 
-# include "Server.hpp"
-# include "Client.hpp"
 
 
 
@@ -80,6 +78,10 @@
 #define BCYAN "\033[1;36m"
 #define BWHITE "\033[1;37m"
 #define BRESET "\033[1;0m"
+
+
+# include "Server.hpp"
+# include "Client.hpp"
 
 
 // Parsing

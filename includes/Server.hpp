@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/22 17:15:44 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/22 17:26:54 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 # define SERVER_HPP
 
 # include "ft_irc.hpp"
+# include "Client.hpp"
+
+
+class Client;
 
 class Server
 {
