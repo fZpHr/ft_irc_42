@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 15:28:53 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/22 15:59:07 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/27 21:26:53 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ int handle_input(int ac, char **av)
 	}
 	if (error > 0)
 		return (1);
-	std::cout << "Port: " << av[1] << std::endl;
-	std::cout << "Password: " << av[2] << std::endl;
+	// std::cout << "Port: " << av[1] << std::endl;
+	// std::cout << "Password: " << av[2] << std::endl;
 	return (0);
 }

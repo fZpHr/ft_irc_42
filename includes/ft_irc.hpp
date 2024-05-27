@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/22 17:33:19 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/27 21:14:23 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@
 #include <signal.h> // Fournit des fonctions pour gérer les signaux dans un programme
 #include <errno.h> // Fournit des macros pour signaler les erreurs
 #include <regex.h> // Fournit des fonctions pour manipuler les expressions régulières
+#include <cstring> // Fournit des fonctions pour manipuler les chaînes de caractères
 
 /**
  * police defines
