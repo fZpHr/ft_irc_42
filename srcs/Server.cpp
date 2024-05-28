@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/28 15:51:56 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/28 21:27:22 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,7 +178,7 @@ void Server::acceptClient()
 	_clients.push_back(newClient); // add the client to the client vector
 	_fds.push_back(pollFd); // add the pollfd to the vector
 
-	std::cout << GREEN << "New client " << clientFd << " from " << newClient.get_IPclient() << RESET <<std::endl;
+	std::cout << GREEN << "New client " << clientFd - 3 << " from " << newClient.get_IPclient() << RESET <<std::endl;
 }
 
 /**
@@ -198,7 +198,7 @@ void Server::receiveData(int fd)
 		return;
 	}
 	buffer[ret] = '\0'; // add a null terminator to the buffer
-	std::cout << YELLOW << "Received " << ret << " bytes from client " << fd << ": " << buffer << RESET << std::endl;
+	std::cout << YELLOW << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << RESET << std::endl;
 }
 
 /**
