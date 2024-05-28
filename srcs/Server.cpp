@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/28 15:45:14 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/28 15:51:56 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void	Server::closeFds()
 {
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
-		std::cout << RED << "Closing client " << _clients[i].get_fd() << std::endl;
+		std::cout << RED << "Closing client " << _clients[i].get_fd() << RESET << std::endl;
 		close(_fds[i].fd);
 	}
 	if (_serverSocketFd != -1)
@@ -84,9 +84,9 @@ void Server::signalHandler(int signal)
 {
 	(void)signal;
 	if (signal == SIGINT)
-		std::cout << std::endl << GREEN << "ctrl + C received" << std::endl;
+		std::cout << std::endl << RED << "ctrl + C received" << RESET << std::endl;
 	else if (signal == SIGQUIT)
-		std::cout << std::endl << GREEN << "ctrl + \\ received" << std::endl;
+		std::cout << std::endl << RED << "ctrl + \\ received" << RESET << std::endl;
 	_signal = true;
 }
 
@@ -178,7 +178,7 @@ void Server::acceptClient()
 	_clients.push_back(newClient); // add the client to the client vector
 	_fds.push_back(pollFd); // add the pollfd to the vector
 
-	std::cout << GREEN << "New client " << clientFd << " from " << newClient.get_IPclient() << std::endl;
+	std::cout << GREEN << "New client " << clientFd << " from " << newClient.get_IPclient() << RESET <<std::endl;
 }
 
 /**
@@ -192,13 +192,13 @@ void Server::receiveData(int fd)
 	ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
 	if (ret  <= 0) // if the client disconnected
 	{
-		std::cout << RED << "Client " << fd << " disconnected" << std::endl;
+		std::cout << RED << "Client " << fd << " disconnected" << RESET << std::endl;
 		clearClients(fd); // remove the client from the pollfd vector and the client vector
 		close(fd); // close the client socket
 		return;
 	}
 	buffer[ret] = '\0'; // add a null terminator to the buffer
-	std::cout << YELLOW << "Received " << ret << " bytes from client " << fd << ": " << buffer << std::endl;
+	std::cout << YELLOW << "Received " << ret << " bytes from client " << fd << ": " << buffer << RESET << std::endl;
 }
 
 /**
@@ -209,8 +209,8 @@ void Server::start()
 	_port = 6667; // set the port to 6667 (standard port)
 	socketCreation(); // create the socket
 
-	std::cout << GREEN << "Server " << _serverSocketFd << " started on port " << _port << std::endl;
-	std::cout << GREEN << "Waiting for clients..." << std::endl;
+	std::cout << YELLOW << "Server started on port " << BYELLOW << _port << RESET << std::endl;
+	std::cout << GREEN << "Waiting for clients..." <<  RESET << std::endl;
 	while (!_signal) // while the signal is not received
 	{
 		if ((poll(_fds.data(), _fds.size(), -1) == -1) && Server::_signal == false ) // wait for events on the pollfd vector, -1 means infinite timeout

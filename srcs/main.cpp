@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/27 21:28:01 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/28 15:50:27 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,6 @@ int main(int ac, char **av)
 		std::cerr << e.what() << '\n';
 	}
 	
-	std::cout << "Server is closing" << std::endl;
+	std::cout << YELLOW << "Server is closing" << RESET << std::endl;
 	return (0);
 }
