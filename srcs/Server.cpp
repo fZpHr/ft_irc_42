@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/27 21:25:26 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/05/28 15:45:14 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,21 +190,15 @@ void Server::receiveData(int fd)
 	memset(buffer, 0, 4096); // set the buffer to 0
 	
 	ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
-	if (ret == -1) // check if the data was received
-	{
-		std::cerr << "Recv failed" << std::endl;
-		clearClients(fd); // remove the client from the pollfd vector and the client vector
-		return;
-	}
 	if (ret  <= 0) // if the client disconnected
 	{
-		std::cout << RED << "Client " << _fds[fd].fd << " disconnected" << std::endl;
+		std::cout << RED << "Client " << fd << " disconnected" << std::endl;
 		clearClients(fd); // remove the client from the pollfd vector and the client vector
 		close(fd); // close the client socket
 		return;
 	}
 	buffer[ret] = '\0'; // add a null terminator to the buffer
-	std::cout << YELLOW << "Received " << ret << " bytes from client " << _fds[fd].fd << ": " << buffer << std::endl;
+	std::cout << YELLOW << "Received " << ret << " bytes from client " << fd << ": " << buffer << std::endl;
 }
 
 /**
@@ -229,7 +223,7 @@ void Server::start()
 				if (_fds[i].fd == _serverSocketFd) // if the file descriptor is the server socket
 					acceptClient(); // accept the client
 				else
-					receiveData(i); // receive data from the client
+					receiveData(_fds[i].fd); // receive data from the client
 			}
 		}
 	}
