@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/03 16:54:25 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/03 17:36:27 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ Server &Server::operator=(Server const &rhs)
 */
 void Server::clearClients(int fd)
 {
-
 	//Remove the client from the pollfd vector
 	for (size_t i = 0; i < _fds.size(); i++)
 	{
@@ -70,7 +69,7 @@ void	Server::closeFds()
 {
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
-		std::cout << RED << "Closing client " << _clients[i]->get_fd() << RESET << std::endl;
+		std::cout << RED << "Closing client " << _clients[i]->get_fd() - 3 << RESET << std::endl;
 		close(_fds[i].fd);
 	}
 	if (_serverSocketFd != -1)
@@ -89,7 +88,6 @@ void Server::signalHandler(int signal)
 		std::cout << std::endl << RED << "ctrl + \\ received" << RESET << std::endl;
 	_signal = true;
 }
-
 
 /**
  * @brief: Create a socket and bind it to the server
@@ -145,14 +143,12 @@ void Server::socketCreation()
 	_fds.push_back(pollFd); // add the pollfd to the vector 
 }
 
-
-
 /**
  * @brief: Receive data from the client
 */
 void Server::acceptClient()
 {
-	Client* newClient = new Client; // create a new client
+	Client *newClient = new Client; // create a new client
 	struct sockaddr_in clientAddr; // create a sockaddr_in struct
 	struct pollfd pollFd; // create a pollfd struct
 	socklen_t clientAddrSize = sizeof(clientAddr); // set the size of the client address
@@ -174,19 +170,33 @@ void Server::acceptClient()
 	pollFd.events = POLLIN; // set the events to POLLIN
 	pollFd.revents = 0; // set the returned events to 0
 
-	(*newClient).set_fd(clientFd); // set the client file descriptor
-	(*newClient).set_IPclient(inet_ntoa(clientAddr.sin_addr)); // set the client IP
+	newClient->set_fd(clientFd); // set the client file descriptor
+	newClient->set_IPclient(inet_ntoa(clientAddr.sin_addr)); // set the client IP
 
 	_clients.push_back(newClient); // add the client to the client vector
 	_fds.push_back(pollFd); // add the pollfd to the vector
 
-	std::cout << GREEN << "New client " << clientFd - 3 << " from " << (*newClient).get_IPclient() << RESET <<std::endl;
+	std::cout << GREEN << "New client " << clientFd - 3 << " from " << newClient->get_IPclient() << RESET <<std::endl;
+}
+
+
+
+int Server::getClientIndex(int fd)
+{
+    for (size_t i = 0; i < _clients.size(); i++)
+    {
+        if (_clients[i]->get_fd() == fd)
+        {
+            return (i);
+        }
+    }
+    return (-1);
 }
 
 /**
  * @brief: Receive data from the client
 */
-void Server::receiveData(int fd, Client &client)
+void Server::receiveData(int fd)
 {
 	char buffer[4096]; // create a buffer to store the data
 	memset(buffer, 0, 4096); // set the buffer to 0
@@ -194,7 +204,7 @@ void Server::receiveData(int fd, Client &client)
 	ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
 	if (ret  <= 0) // if the client disconnected
 	{
-		std::cout << RED << "Client " << fd << " disconnected" << RESET << std::endl;
+		std::cout << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
 		clearClients(fd); // remove the client from the pollfd vector and the client vector
 		close(fd); // close the client socket
 		return;
@@ -202,19 +212,25 @@ void Server::receiveData(int fd, Client &client)
 	buffer[ret] = '\0'; // add a null terminator to the buffer
 	std::string command(buffer);
 
-	if (!handleExecCommand(client, command))
+	if (!handleExecCommand(command, fd))
 	{
 		std::cout << "Command applied" << std::endl;
 	}
 	else
 	{
-		std::cout << "Received " << ret << " bytes from client " << fd << ": " << buffer << std::endl;
+		std::cout << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
 	}
 }
 
-
-int Server::handleExecCommand(Client &client, const std::string& command)
+int Server::handleExecCommand(const std::string &command, int fd)
 {
+
+    int clientIndex = getClientIndex(fd);
+    if (clientIndex == -1)
+    {
+        std::cerr << "No client found for fd " << fd << std::endl;
+        return 1;
+    }
 	std::istringstream iss(command);
 	std::string word;
 	iss >> word;
@@ -228,13 +244,12 @@ int Server::handleExecCommand(Client &client, const std::string& command)
 	{
 		if (word == commands[i])
 		{
-			(client.*functions[i])(argument);
+			(_clients[clientIndex]->*functions[i])(argument);
 			return (0);
 		}
 	}
 	return (1);
 }
-
 
 /**
  * @brief: Start the server
@@ -258,7 +273,7 @@ void Server::start()
 				if (_fds[i].fd == _serverSocketFd) // if the file descriptor is the server socket
 					acceptClient(); // accept the client
 				else
-					receiveData(_fds[i].fd, *_clients[i]); // receive data from the client
+					receiveData(_fds[i].fd); // receive data from the client
 			}
 		}
 	}

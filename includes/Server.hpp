@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/03 16:53:49 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/03 17:33:31 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,12 @@ class Server
 		void start();
 		void socketCreation();
 		void acceptClient();
-		void receiveData(int fd, Client &client);
+		void receiveData(int fd);
 
 		static void signalHandler(int signal);
 
-		int handleExecCommand(Client &client, const std::string& command);
+		int handleExecCommand(const std::string &command, int fd);
+		int getClientIndex(int fd);
 
 		void closeFds();
 		void clearClients(int fd);
