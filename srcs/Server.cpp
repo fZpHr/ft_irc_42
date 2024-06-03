@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/28 21:27:22 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/03 16:54:25 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void Server::clearClients(int fd)
 	//Remove the client from the client vector
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
-		if (_clients[i].get_fd() == fd)
+		if (_clients[i]->get_fd() == fd)
 		{
 			_clients.erase(_clients.begin() + i);
 			break;
@@ -70,7 +70,7 @@ void	Server::closeFds()
 {
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
-		std::cout << RED << "Closing client " << _clients[i].get_fd() << RESET << std::endl;
+		std::cout << RED << "Closing client " << _clients[i]->get_fd() << RESET << std::endl;
 		close(_fds[i].fd);
 	}
 	if (_serverSocketFd != -1)
@@ -145,12 +145,14 @@ void Server::socketCreation()
 	_fds.push_back(pollFd); // add the pollfd to the vector 
 }
 
+
+
 /**
  * @brief: Receive data from the client
 */
 void Server::acceptClient()
 {
-	Client newClient; // create a new client
+	Client* newClient = new Client; // create a new client
 	struct sockaddr_in clientAddr; // create a sockaddr_in struct
 	struct pollfd pollFd; // create a pollfd struct
 	socklen_t clientAddrSize = sizeof(clientAddr); // set the size of the client address
@@ -172,19 +174,19 @@ void Server::acceptClient()
 	pollFd.events = POLLIN; // set the events to POLLIN
 	pollFd.revents = 0; // set the returned events to 0
 
-	newClient.set_fd(clientFd); // set the client file descriptor
-	newClient.set_IPclient(inet_ntoa(clientAddr.sin_addr)); // set the client IP
+	(*newClient).set_fd(clientFd); // set the client file descriptor
+	(*newClient).set_IPclient(inet_ntoa(clientAddr.sin_addr)); // set the client IP
 
 	_clients.push_back(newClient); // add the client to the client vector
 	_fds.push_back(pollFd); // add the pollfd to the vector
 
-	std::cout << GREEN << "New client " << clientFd - 3 << " from " << newClient.get_IPclient() << RESET <<std::endl;
+	std::cout << GREEN << "New client " << clientFd - 3 << " from " << (*newClient).get_IPclient() << RESET <<std::endl;
 }
 
 /**
  * @brief: Receive data from the client
 */
-void Server::receiveData(int fd)
+void Server::receiveData(int fd, Client &client)
 {
 	char buffer[4096]; // create a buffer to store the data
 	memset(buffer, 0, 4096); // set the buffer to 0
@@ -198,8 +200,41 @@ void Server::receiveData(int fd)
 		return;
 	}
 	buffer[ret] = '\0'; // add a null terminator to the buffer
-	std::cout << YELLOW << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << RESET << std::endl;
+	std::string command(buffer);
+
+	if (!handleExecCommand(client, command))
+	{
+		std::cout << "Command applied" << std::endl;
+	}
+	else
+	{
+		std::cout << "Received " << ret << " bytes from client " << fd << ": " << buffer << std::endl;
+	}
 }
+
+
+int Server::handleExecCommand(Client &client, const std::string& command)
+{
+	std::istringstream iss(command);
+	std::string word;
+	iss >> word;
+	std::string argument;
+	iss >> argument;
+
+	const std::string commands[7] = { "USER", "NICK" /*, "PASS" , "QUIT" , "PRIVMSG" , "PING", "PONG"*/};
+	void (Client::*functions[7])(std::string) = {&Client::setUser, &Client::setNick};
+
+	for (int i = 0; i < 2; i++) 
+	{
+		if (word == commands[i])
+		{
+			(client.*functions[i])(argument);
+			return (0);
+		}
+	}
+	return (1);
+}
+
 
 /**
  * @brief: Start the server
@@ -223,7 +258,7 @@ void Server::start()
 				if (_fds[i].fd == _serverSocketFd) // if the file descriptor is the server socket
 					acceptClient(); // accept the client
 				else
-					receiveData(_fds[i].fd); // receive data from the client
+					receiveData(_fds[i].fd, *_clients[i]); // receive data from the client
 			}
 		}
 	}

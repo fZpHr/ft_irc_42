@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/27 18:45:54 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/03 16:53:49 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,11 @@ class Server
 		void start();
 		void socketCreation();
 		void acceptClient();
-		void receiveData(int fd);
+		void receiveData(int fd, Client &client);
 
 		static void signalHandler(int signal);
+
+		int handleExecCommand(Client &client, const std::string& command);
 
 		void closeFds();
 		void clearClients(int fd);
@@ -43,7 +45,7 @@ class Server
 		int _port;
 		int _serverSocketFd;
 		static bool _signal;
-		std::vector<Client> _clients;
+		std::vector<Client *> _clients;
 		std::vector<struct pollfd> _fds;
 };
 
