@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/03 17:36:27 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/03 19:25:27 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ Server &Server::operator=(Server const &rhs)
 	}
 	return (*this);
 }
+
 
 /**
  * @brief: Remove the client from the pollfd vector and the client vector
@@ -183,14 +184,14 @@ void Server::acceptClient()
 
 int Server::getClientIndex(int fd)
 {
-    for (size_t i = 0; i < _clients.size(); i++)
-    {
-        if (_clients[i]->get_fd() == fd)
-        {
-            return (i);
-        }
-    }
-    return (-1);
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->get_fd() == fd)
+		{
+			return (i);
+		}
+	}
+	return (-1);
 }
 
 /**
@@ -225,31 +226,32 @@ void Server::receiveData(int fd)
 int Server::handleExecCommand(const std::string &command, int fd)
 {
 
-    int clientIndex = getClientIndex(fd);
-    if (clientIndex == -1)
-    {
-        std::cerr << "No client found for fd " << fd << std::endl;
-        return 1;
-    }
+	int clientIndex = getClientIndex(fd);
+	if (clientIndex == -1)
+	{
+		std::cerr << "No client found for fd " << fd << std::endl;
+		return 1;
+	}
 	std::istringstream iss(command);
 	std::string word;
 	iss >> word;
-	std::string argument;
-	iss >> argument;
 
-	const std::string commands[7] = { "USER", "NICK" /*, "PASS" , "QUIT" , "PRIVMSG" , "PING", "PONG"*/};
-	void (Client::*functions[7])(std::string) = {&Client::setUser, &Client::setNick};
+	const std::string commands[4] = { "USER", "NICK" , "MSG" , "JOIN"};
+	int (Client::*functions[4])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan};
 
-	for (int i = 0; i < 2; i++) 
+	for (int i = 0; i < 4; i++) 
 	{
 		if (word == commands[i])
 		{
-			(_clients[clientIndex]->*functions[i])(argument);
-			return (0);
+			if ((_clients[clientIndex]->*functions[i])(command))
+				return 1;
+			else
+				return (0);
 		}
 	}
 	return (1);
 }
+
 
 /**
  * @brief: Start the server
