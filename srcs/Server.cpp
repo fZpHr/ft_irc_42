@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/03 19:25:27 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/04 19:04:29 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ void Server::socketCreation()
 */
 void Server::acceptClient()
 {
-	Client *newClient = new Client; // create a new client
+	Client *newClient = new Client(this); // create a new client
 	struct sockaddr_in clientAddr; // create a sockaddr_in struct
 	struct pollfd pollFd; // create a pollfd struct
 	socklen_t clientAddrSize = sizeof(clientAddr); // set the size of the client address
@@ -182,7 +182,7 @@ void Server::acceptClient()
 
 
 
-int Server::getClientIndex(int fd)
+int Server::clientExistFd(int fd)
 {
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
@@ -193,6 +193,19 @@ int Server::getClientIndex(int fd)
 	}
 	return (-1);
 }
+
+int Server::clientExistString(std::string name)
+{
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->getUser() == name || _clients[i]->getNick() == name)
+		{
+			return (i);
+		}
+	}
+	return (-1);
+}
+
 
 /**
  * @brief: Receive data from the client
@@ -226,7 +239,7 @@ void Server::receiveData(int fd)
 int Server::handleExecCommand(const std::string &command, int fd)
 {
 
-	int clientIndex = getClientIndex(fd);
+	int clientIndex = clientExistFd(fd);
 	if (clientIndex == -1)
 	{
 		std::cerr << "No client found for fd " << fd << std::endl;
@@ -252,6 +265,30 @@ int Server::handleExecCommand(const std::string &command, int fd)
 	return (1);
 }
 
+void Server::addChannel(Channel *channel)
+{
+	_channels.push_back(channel);
+}
+
+int Server::channelExist(std::string name)
+{
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if (_channels[i]->getName() == name)
+			return (1);
+	}
+	return (0);
+}
+
+std::vector<Client *> Server::getClients()
+{
+	return (_clients);
+}
+
+std::vector<Channel *> Server::getChannels()
+{
+	return (_channels);
+}
 
 /**
  * @brief: Start the server
@@ -282,6 +319,44 @@ void Server::start()
 	closeFds(); // close all clients and the server socket
 }
 
+
+
+
+//DEBUG PURPOSE
+
+void Server::printState()
+{
+	std::cout << "Clients: " << _clients.size() << std::endl;
+	std::cout << GREEN << "-----------" << RESET << std::endl;
+	if (_clients.size() > 0)
+	{
+		for (size_t i = 0; i < _clients.size(); i++)
+		{
+			std::cout << "Client nick: " << _clients[i]->getNick() << std::endl;
+			std::cout << "Client user: " << _clients[i]->getUser() << std::endl;
+			std::cout << "Client fd: " << _clients[i]->get_fd() << std::endl;
+			std::cout << "Client IP: " << _clients[i]->get_IPclient() << std::endl;
+			std::cout << "Client perms: " << _clients[i]->getPerms() << std::endl;
+			if (i < _clients.size() - 1)
+				std::cout << GREEN << "-----------" << RESET << std::endl;
+		}
+	}
+	std::cout << YELLOW << "------------------------" << RESET << std::endl;
+	std::cout << "Channels: " << _channels.size() << std::endl;
+	std::cout << GREEN << "-----------" << RESET << std::endl;
+	if (_channels.size() > 0)
+	{
+		for (size_t i = 0; i < _channels.size(); i++)
+		{
+			std::cout << "Channel name: " << _channels[i]->getName() << std::endl;
+			std::cout << "Channel topic: " << _channels[i]->getTopic() << std::endl;
+			// std::cout << "Channel user limit: " << _channels[i]->getUserLimit() << std::endl;
+			// std::cout << "Channel private: " << _channels[i]->getPrivate() << std::endl;
+			if (i < _channels.size() - 1)
+				std::cout << GREEN << "-----------" << RESET << std::endl;
+		}
+	}
+}
 
 
 

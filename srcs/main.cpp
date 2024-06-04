@@ -6,11 +6,16 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/05/28 15:50:27 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/04 19:10:58 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/ft_irc.hpp"
+// #include <thread> 
+// #include <atomic>
+// #include <mutex>
+// std::atomic<bool> running(true);
+// std::mutex cout_mutex;
 
 /**
  * @brief: main function
@@ -25,10 +30,33 @@ int main(int ac, char **av)
 		return (1);
 	
 	Server server;
+	if (DEBUG)
+	{
+		// std::thread serverStateThread([&server]()
+		// {
+		// 	while (running)
+		// 	{
+		// 		cout_mutex.lock();
+		// 		std::cout << "\033[2J\033[H";
+		// 		std::cout << YELLOW << "-----------Server state-----------" << RESET << std::endl;
+		// 		server.printState();
+		// 		cout_mutex.unlock();
+		// 		std::this_thread::sleep_for(std::chrono::seconds(1));
+		// 	}
+		// });
+		// serverStateThread.detach();
+	}
 	try
 	{
 		signal(SIGINT, Server::signalHandler); // CTRL + C (add signalHandler to handle the signal)
 		signal(SIGQUIT, Server::signalHandler); // CTRL + \ (add signalHandler to handle the signal)
+		Channel* channel = new Channel();
+
+		channel->setName("General");
+		channel->setTopic("General Discussion");
+		// channel->setUserLimit(50);
+		// channel->setPrivate(false);
+		server.addChannel(channel);
 		server.start(); 
 	}
 	catch(const std::exception& e)

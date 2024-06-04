@@ -16,6 +16,7 @@ SRCS	=	srcs/main.cpp \
 			srcs/parsing/handle_input.cpp \
 			srcs/Client.cpp \
 			srcs/Server.cpp \
+			srcs/Channel.cpp
 
 OBJ_DIR = .o
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
@@ -23,7 +24,9 @@ OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
 RM	=	rm -f
 HEADER =	-I includes
 
-CXXFLAGS= -Wall -Wextra -Werror -std=c++98 -g
+STD	=	-std=c++98
+
+CXXFLAGS= -Wall -Wextra -Werror $(STD) -g
 
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(@D)
@@ -52,6 +55,7 @@ fclean:	clean
 re:	fclean all
 
 debug: fclean
+debug: STD = -std=c++11
 debug: CXXFLAGS += -D DEBUG=1
 debug: all
 

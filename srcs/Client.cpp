@@ -6,16 +6,19 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/03 19:26:27 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/04 18:27:07 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/Client.hpp"
 
-Client::Client()
+Client::Client(Server *server) : _server(server)
 {
 	_perms = false;
+	_username = "";
+	_nickname = "";
 }
+
 
 Client::~Client()
 {
@@ -113,16 +116,25 @@ int	Client::prvMsg(std::string input)
 	iss >> msg;
 	iss >> error;
 
-	if (!error.empty() || msg.empty())
+	if (!error.empty() || msg.empty() || target.empty() || user.empty())
 	{
-		std::cerr << RED << "Input error: " << error << RESET << std::endl;
+		std::cerr << RED << "Input error" << RESET << std::endl;
 		return 1;
 	}
-	(void) target;
-	(void) msg;
-	std::cerr << RED << "DEV IN PROGRESS" << RESET << std::endl;
+	if (!_server->clientExistString(target))
+	{
+		std::cerr << RED << "Client does not exist: " << target << RESET << std::endl;
+		return 1;
+	}
+	for (size_t i = 0; i < _server->getClients().size(); i++)
+	{
+		if (_server->getClients()[i]->getNick() == target || _server->getClients()[i]->getUser() == target)
+		{
+			_server->getClients()[i]->receiveMsg(msg);
+		}
+	}
+	
 	return 0;
-	//sendMsg(target, msg);
 }
 
 int	Client::joinChan(std::string target)
@@ -140,7 +152,38 @@ int	Client::joinChan(std::string target)
 		std::cerr << RED << "Input error: " << error << RESET << std::endl;
 		return 1;
 	}
-	std::cerr << RED << "DEV IN PROGRESS" << RESET << std::endl;
-	(void)target;
+	if (!_server->channelExist(argument))
+    {
+        std::cerr << RED << "Channel does not exist: " << argument << RESET << std::endl;
+        return 1;
+    }
+	for (size_t i = 0; i < _server->getChannels().size(); i++)
+	{
+		if (_server->getChannels()[i]->getName() == argument)
+		{
+			_server->getChannels()[i]->addClient(this);
+			std::cout << "Client " << _nickname << " joined channel " << argument << std::endl;
+		}
+	}
 	return 0;
+}
+
+void	Client::receiveMsg(std::string msg)
+{
+	std::cout << msg << std::endl;
+}
+
+std::string	Client::getUser()
+{
+	return (_username);
+}
+
+std::string	Client::getNick()
+{
+	return (_nickname);
+}
+
+bool	Client::getPerms()
+{
+	return (_perms);
 }
