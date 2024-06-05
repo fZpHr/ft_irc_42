@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/04 18:53:02 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 16:29:18 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@
 # include "Server.hpp"
 # include "Client.hpp"
 # include "Channel.hpp"
+# include "error.hpp"
 
 
 // Parsing

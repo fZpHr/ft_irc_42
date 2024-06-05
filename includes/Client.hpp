@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:48:40 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/04 18:25:34 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 16:42:17 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,9 @@ class Client
 		int			prvMsg(std::string input);
 		int			joinChan(std::string target);
 
+		void		setPassword(bool password);
+		bool		getPassword();
+
 		void		receiveMsg(std::string msg);
 	
 	private:
@@ -48,6 +51,7 @@ class Client
 		int				_clientFd;
 		std::string		_IPclient;
 		bool			_perms;
+		bool			_password;
 	
 };
 

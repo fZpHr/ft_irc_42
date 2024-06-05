@@ -6,17 +6,16 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 15:28:53 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/03 15:35:49 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 16:03:58 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/ft_irc.hpp"
 
-std::string password = "slt";
-std::string port = "6667";
-
 int handle_input(int ac, char **av)
 {
+	std::string password = "slt";
+	std::string port = "6667";
 	int error = 0;
 
 	if (ac != 3)

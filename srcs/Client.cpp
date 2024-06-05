@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/04 18:27:07 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 17:00:03 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 Client::Client(Server *server) : _server(server)
 {
 	_perms = false;
+	_password = false;
 	_username = "";
 	_nickname = "";
 }
@@ -107,31 +108,29 @@ void	Client::setPerms(bool perms)
 int	Client::prvMsg(std::string input)
 {
 	std::istringstream iss(input);
-	std::string user;
+	std::string cmd;
 	std::string target;
 	std::string msg;
 	std::string error;
-	iss >> user;
+	iss >> cmd;
 	iss >> target;
 	iss >> msg;
 	iss >> error;
 
-	if (!error.empty() || msg.empty() || target.empty() || user.empty())
+	if (!error.empty() || msg.empty() || target.empty())
 	{
 		std::cerr << RED << "Input error" << RESET << std::endl;
 		return 1;
 	}
-	if (!_server->clientExistString(target))
+	int clientIndex = _server->clientExistString(target);
+	if (clientIndex != -1)
+	{
+		_server->getClients()[clientIndex]->receiveMsg(msg);
+	}
+	else
 	{
 		std::cerr << RED << "Client does not exist: " << target << RESET << std::endl;
 		return 1;
-	}
-	for (size_t i = 0; i < _server->getClients().size(); i++)
-	{
-		if (_server->getClients()[i]->getNick() == target || _server->getClients()[i]->getUser() == target)
-		{
-			_server->getClients()[i]->receiveMsg(msg);
-		}
 	}
 	
 	return 0;
@@ -186,4 +185,17 @@ std::string	Client::getNick()
 bool	Client::getPerms()
 {
 	return (_perms);
+}
+
+bool	Client::getPassword()
+{
+	return (_password);
+}
+
+void	Client::setPassword(bool password)
+{
+	if (password == true)
+		_password = true;
+	else
+		_password = false;
 }

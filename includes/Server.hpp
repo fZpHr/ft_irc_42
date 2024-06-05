@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/04 18:22:57 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 16:38:53 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ class Server
 		std::vector<Client *> getClients();
 		std::vector<Channel *> getChannels();
 
+		int	checkPassword(std::string password);
+
 
 		//DEBUG PURPOSE
 		void printState();
@@ -58,6 +60,7 @@ class Server
 		static bool _signal;
 		std::vector<Client *> _clients;
 		std::vector<struct pollfd> _fds;
+		std::string _password;
 };
 
 #endif

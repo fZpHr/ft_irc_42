@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/04 19:04:29 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 16:51:23 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ bool Server::_signal = false;
 
 Server::Server()
 {
+	_port = 6667;
+	_password = "slt";
 	_serverSocketFd = -1;
 }
 
@@ -149,6 +151,7 @@ void Server::socketCreation()
 */
 void Server::acceptClient()
 {
+	
 	Client *newClient = new Client(this); // create a new client
 	struct sockaddr_in clientAddr; // create a sockaddr_in struct
 	struct pollfd pollFd; // create a pollfd struct
@@ -196,10 +199,13 @@ int Server::clientExistFd(int fd)
 
 int Server::clientExistString(std::string name)
 {
+	if (name.empty())
+		return (-1);
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
 		if (_clients[i]->getUser() == name || _clients[i]->getNick() == name)
 		{
+			std::cout << GREEN << "Client found: " << _clients[i]->getUser() << RESET << std::endl;
 			return (i);
 		}
 	}
@@ -212,27 +218,69 @@ int Server::clientExistString(std::string name)
 */
 void Server::receiveData(int fd)
 {
-	char buffer[4096]; // create a buffer to store the data
-	memset(buffer, 0, 4096); // set the buffer to 0
-	
-	ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
-	if (ret  <= 0) // if the client disconnected
+	Client *client = getClients()[clientExistFd(fd)];
+	if (!client->getPassword())
 	{
-		std::cout << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
-		clearClients(fd); // remove the client from the pollfd vector and the client vector
-		close(fd); // close the client socket
-		return;
-	}
-	buffer[ret] = '\0'; // add a null terminator to the buffer
-	std::string command(buffer);
+		char buffer[4096]; // create a buffer to store the data
+		memset(buffer, 0, 4096); // set the buffer to 0
+		ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
+		if (ret  <= 0) // if the client disconnected
+		{
+			std::cout << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
+			clearClients(fd); // remove the client from the pollfd vector and the client vector
+			close(fd); // close the client socket
+			return;
+		}
+		buffer[ret] = '\0'; // add a null terminator to the buffer
+		std::istringstream iss(buffer);
+		std::string cmd;
+		std::string password;
+		iss >> cmd;
+		iss >> password;
+		if (cmd == "PASS")
+		{
 
-	if (!handleExecCommand(command, fd))
-	{
-		std::cout << "Command applied" << std::endl;
+			if (checkPassword(password))
+			{
+				std::cout << BGREEN << "Password accepted for :" << fd - 3 << RESET <<  std::endl;
+				client->setPassword(true);
+			}
+			else
+			{
+				std::cerr << BRED << ERR_PASSWDMISMATCH(password) << RESET << std::endl;
+				return;
+			}
+		}
+		else
+		{
+			std::cerr << BRED << "Need password to interacte with the server" << RESET << std::endl;
+			return;
+		}
 	}
 	else
 	{
-		std::cout << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
+		char buffer[4096]; // create a buffer to store the data
+		memset(buffer, 0, 4096); // set the buffer to 0
+		
+		ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
+		if (ret  <= 0) // if the client disconnected
+		{
+			std::cout << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
+			clearClients(fd); // remove the client from the pollfd vector and the client vector
+			close(fd); // close the client socket
+			return;
+		}
+		buffer[ret] = '\0'; // add a null terminator to the buffer
+		std::string command(buffer);
+
+		if (handleExecCommand(command, fd))
+		{
+			std::cout << BGREEN << "Command applied" << RESET << std::endl;
+		}
+		else
+		{
+			std::cout << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
+		}
 	}
 }
 
@@ -243,7 +291,7 @@ int Server::handleExecCommand(const std::string &command, int fd)
 	if (clientIndex == -1)
 	{
 		std::cerr << "No client found for fd " << fd << std::endl;
-		return 1;
+		return 0;
 	}
 	std::istringstream iss(command);
 	std::string word;
@@ -257,12 +305,12 @@ int Server::handleExecCommand(const std::string &command, int fd)
 		if (word == commands[i])
 		{
 			if ((_clients[clientIndex]->*functions[i])(command))
-				return 1;
+				return 0;
 			else
-				return (0);
+				return 1;
 		}
 	}
-	return (1);
+	return 0;
 }
 
 void Server::addChannel(Channel *channel)
@@ -290,12 +338,23 @@ std::vector<Channel *> Server::getChannels()
 	return (_channels);
 }
 
+int Server::checkPassword(std::string password)
+{
+	if (password != _password)
+	{
+		return (0);
+	}
+	else
+	{
+		return (1);
+	}
+}
+
 /**
  * @brief: Start the server
 */
 void Server::start()
 {
-	_port = 6667; // set the port to 6667 (standard port)
 	socketCreation(); // create the socket
 
 	std::cout << YELLOW << "Server started on port " << BYELLOW << _port << RESET << std::endl;
