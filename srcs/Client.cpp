@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 17:00:03 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 22:05:16 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,16 +61,27 @@ void Client::set_IPclient(std::string IPclient)
 int	Client::setUser(std::string name)
 {
 	std::istringstream iss(name);
-	std::string word;
+	std::string cmd;
 	std::string argument;
+	std::string hostname;
+	std::string servername;
+	std::string realname;
 	std::string error;
-	iss >> word;
+	iss >> cmd;
 	iss >> argument;
+	iss >> hostname;
+	iss >> servername;
+	iss >> realname;
 	iss >> error;
 
-	if (!error.empty() || argument.empty())
+	if (!error.empty())
 	{
 		std::cerr << RED << "Input error: " << error << RESET << std::endl;
+		return 1;
+	}
+	else if (realname.empty())
+	{
+		std::cerr << RED << "Input error" << RESET << std::endl;
 		return 1;
 	}
 	_username = argument;
@@ -90,6 +101,11 @@ int  Client::setNick(std::string nick)
 	if (!error.empty() || argument.empty())
 	{
 		std::cerr << RED << "Input error: " << error << RESET << std::endl;
+		return 1;
+	}
+	if (_server->clientExistString(argument) != -1)
+	{
+		std::cerr << RED << ERR_NICKNAMEINUSE(argument, argument) << RESET << std::endl;
 		return 1;
 	}
 	_nickname = argument;

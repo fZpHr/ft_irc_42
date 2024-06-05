@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 16:51:23 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 22:17:41 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,8 @@
 
 bool Server::_signal = false;
 
-Server::Server()
+Server::Server(int port, std::string password) : _port(port), _password(password)
 {
-	_port = 6667;
-	_password = "slt";
 	_serverSocketFd = -1;
 }
 
@@ -212,6 +210,98 @@ int Server::clientExistString(std::string name)
 	return (-1);
 }
 
+std::vector<std::string> handleLogin(std::string &buffer)
+{
+	std::vector<std::string> parts;
+	size_t pos = 0;
+	while ((pos = buffer.find("\n")) != std::string::npos)
+	{
+		std::string part = buffer.substr(0, pos);
+		std::istringstream iss(part);
+		std::string cmd;
+		iss >> cmd;
+		if (cmd != "CAP")
+			parts.push_back(part);
+		buffer.erase(0, pos + 1);
+	}
+	if (!buffer.empty())
+	{
+		parts.push_back(buffer);
+	}
+	return parts;
+}
+
+void	Server::checkLogin(Client *client, int fd)
+{
+	char buffer[4096]; // create a buffer to store the data
+	memset(buffer, 0, 4096); // set the buffer to 0
+	ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
+	if (ret  <= 0) // if the client disconnected
+	{
+		std::cout << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
+		clearClients(fd); // remove the client from the pollfd vector and the client vector
+		close(fd); // close the client socket
+		return;
+	}
+	buffer[ret] = '\0'; // add a null terminator to the buffer
+	std::string bufferStr(buffer);
+	std::vector<std::string> result = handleLogin(bufferStr);
+	std::string pass;
+	std::string nick;
+	std::string user;
+	for (std::vector<std::string>::const_iterator it = result.begin(); it != result.end(); ++it)
+	{
+		if (it->size() >= 4 && it->substr(0, 4) == "PASS")
+		{
+			pass = *it;
+		}
+		else if (it->size() >= 4 && it->substr(0, 4) == "NICK")
+		{
+			nick = *it;
+		}
+		else if (it->size() >= 4 && it->substr(0, 4) == "USER")
+		{
+			user = *it;
+		}
+	}
+	if (pass.substr(0, 4) == "PASS")
+	{
+		if (checkPassword(pass))
+		{
+			std::cout << GREEN << "Password accepted for : " << fd - 3 << RESET <<  std::endl;
+			client->setPassword(true);
+			if (!nick.empty() && !user.empty())
+			{
+				if (processCommand(nick, fd))
+				{
+					std::cout << GREEN << "Nick applied" << RESET << std::endl;
+				}
+				else
+				{
+					std::cout << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
+				}
+				if (processCommand(user, fd))
+				{
+					std::cout << GREEN << "User applied" << RESET << std::endl;
+				}
+				else
+				{
+					std::cout << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
+				}
+			}
+		}
+		else
+		{
+			std::cerr << BRED << ERR_PASSWDMISMATCH(pass) << RESET << std::endl;
+			return;
+		}
+	}
+	else
+	{
+		std::cerr << BRED << "Need password to interacte with the server" << RESET << std::endl;
+		return;
+	}
+}
 
 /**
  * @brief: Receive data from the client
@@ -221,41 +311,8 @@ void Server::receiveData(int fd)
 	Client *client = getClients()[clientExistFd(fd)];
 	if (!client->getPassword())
 	{
-		char buffer[4096]; // create a buffer to store the data
-		memset(buffer, 0, 4096); // set the buffer to 0
-		ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
-		if (ret  <= 0) // if the client disconnected
-		{
-			std::cout << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
-			clearClients(fd); // remove the client from the pollfd vector and the client vector
-			close(fd); // close the client socket
-			return;
-		}
-		buffer[ret] = '\0'; // add a null terminator to the buffer
-		std::istringstream iss(buffer);
-		std::string cmd;
-		std::string password;
-		iss >> cmd;
-		iss >> password;
-		if (cmd == "PASS")
-		{
-
-			if (checkPassword(password))
-			{
-				std::cout << BGREEN << "Password accepted for :" << fd - 3 << RESET <<  std::endl;
-				client->setPassword(true);
-			}
-			else
-			{
-				std::cerr << BRED << ERR_PASSWDMISMATCH(password) << RESET << std::endl;
-				return;
-			}
-		}
-		else
-		{
-			std::cerr << BRED << "Need password to interacte with the server" << RESET << std::endl;
-			return;
-		}
+		checkLogin(client, fd);
+		return;
 	}
 	else
 	{
@@ -272,10 +329,9 @@ void Server::receiveData(int fd)
 		}
 		buffer[ret] = '\0'; // add a null terminator to the buffer
 		std::string command(buffer);
-
-		if (handleExecCommand(command, fd))
+		if (processCommand(command, fd))
 		{
-			std::cout << BGREEN << "Command applied" << RESET << std::endl;
+			std::cout << GREEN << "Command applied" << RESET << std::endl;
 		}
 		else
 		{
@@ -284,26 +340,34 @@ void Server::receiveData(int fd)
 	}
 }
 
-int Server::handleExecCommand(const std::string &command, int fd)
+int	Server::processCommand(std::string command, int fd)
 {
-
+	std::istringstream iss(command);
+	std::string cmd;
+	iss >> cmd;
 	int clientIndex = clientExistFd(fd);
 	if (clientIndex == -1)
 	{
 		std::cerr << "No client found for fd " << fd << std::endl;
 		return 0;
 	}
-	std::istringstream iss(command);
-	std::string word;
-	iss >> word;
-
 	const std::string commands[4] = { "USER", "NICK" , "MSG" , "JOIN"};
 	int (Client::*functions[4])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan};
 
 	for (int i = 0; i < 4; i++) 
 	{
-		if (word == commands[i])
+		if (cmd == commands[i])
 		{
+			if (_clients[clientIndex]->getNick().empty() && cmd != "NICK")
+			{
+				std::cerr << BRED << "Need to set Nick first for: " << fd - 3 << RESET << std::endl;
+				return 0;
+			}
+			else if (_clients[clientIndex]->getUser().empty() && cmd != "NICK" && cmd != "USER")
+			{
+				std::cerr << BRED << "Need to set User first for: " << fd - 3 << RESET << std::endl;
+				return 0;
+			}
 			if ((_clients[clientIndex]->*functions[i])(command))
 				return 0;
 			else
@@ -312,6 +376,30 @@ int Server::handleExecCommand(const std::string &command, int fd)
 	}
 	return 0;
 }
+
+
+// int Server::handleExecCommand(const std::string &command, int fd)
+// {
+// 	if (command.find("\n") != std::string::npos)
+// 	{
+// 		std::istringstream stream(command);
+// 		std::string firstcmd;
+// 		std::string secondcmd;
+// 		std::getline(stream, firstcmd, '\n');
+// 		std::getline(stream, firstcmd, '\n');
+// 		std::getline(stream, secondcmd, '\n');
+// 		if (!processCommand(firstcmd, fd))
+// 			return 0;
+// 		if (!processCommand(secondcmd, fd))
+// 			return 0;
+// 	}
+// 	else
+// 	{
+// 		if (!processCommand(command, fd))
+// 			return 0;
+// 	}
+// 	return 1;
+// }
 
 void Server::addChannel(Channel *channel)
 {
@@ -340,7 +428,12 @@ std::vector<Channel *> Server::getChannels()
 
 int Server::checkPassword(std::string password)
 {
-	if (password != _password)
+	std::istringstream iss(password);
+	std::string cmd;
+	std::string pass;
+	iss >> cmd;
+	iss >> pass;
+	if (pass!= _password)
 	{
 		return (0);
 	}

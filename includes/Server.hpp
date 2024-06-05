@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 16:38:53 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 22:17:16 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ class Client;
 class Server
 {
 	public:
-		Server();
+		Server(int port, std::string password);
 		~Server();
 
 		void start();
@@ -33,7 +33,7 @@ class Server
 
 		static void signalHandler(int signal);
 
-		int handleExecCommand(const std::string &command, int fd);
+		// int handleExecCommand(const std::string &command, int fd);
 
 		void closeFds();
 		void clearClients(int fd);
@@ -45,13 +45,20 @@ class Server
 		std::vector<Client *> getClients();
 		std::vector<Channel *> getChannels();
 
+		void checkLogin(Client *client, int fd);
+
+		int	processCommand(std::string command, int fd);
+
+
 		int	checkPassword(std::string password);
+
 
 
 		//DEBUG PURPOSE
 		void printState();
 	
 	private:
+		Server();
 		Server(Server const &src);
 		Server &operator=(Server const &rhs);
 		std::vector<Channel *> _channels;

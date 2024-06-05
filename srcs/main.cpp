@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 15:34:47 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 22:14:03 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int main(int ac, char **av)
 	if (handle_input(ac, av) == 1)
 		return (1);
 	
-	Server server;
+	Server server(atoi(av[1]), av[2]);
 	if (DEBUG)
 	{
 		// std::thread serverStateThread([&server]()

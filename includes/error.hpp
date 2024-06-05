@@ -6,13 +6,14 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/05 16:19:54 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 17:05:06 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/05 17:20:49 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #ifndef ERROR_HPP
 # define ERROR_HPP
+
 
 # define RPL_LISTSTART(input)					"321 " + input + " Channel :Users  Name"
 # define RPL_LIST(input, chan, users, topic)	"322 " + input + " " + chan + " " + users + " :" + topic
