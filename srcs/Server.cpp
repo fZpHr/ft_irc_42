@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 14:55:03 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/06 15:14:53 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -289,7 +289,6 @@ void	Server::checkLogin(Client *client, int fd)
 					std::cout << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
 				}
 			}
-			send();
 		}
 		else
 		{
@@ -409,6 +408,11 @@ void Server::addChannel(Channel *channel)
 
 int Server::channelExist(std::string name)
 {
+	if (name[0] != '#')
+		return (1);
+	if (name.length() == 1)
+		return (1);
+	name = name.substr(1, name.length());
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		if (_channels[i]->getName() == name)

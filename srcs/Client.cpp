@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 22:05:16 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 15:15:10 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,6 +178,7 @@ int	Client::joinChan(std::string target)
 		{
 			_server->getChannels()[i]->addClient(this);
 			std::cout << "Client " << _nickname << " joined channel " << argument << std::endl;
+			send();
 		}
 	}
 	return 0;
