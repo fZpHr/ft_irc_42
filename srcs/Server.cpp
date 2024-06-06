@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 17:28:08 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 21:14:51 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,8 +181,6 @@ void Server::acceptClient()
 	std::cout << GREEN << "New client " << clientFd - 3 << " from " << newClient->get_IPclient() << RESET <<std::endl;
 }
 
-
-
 int Server::clientExistFd(int fd)
 {
 	for (size_t i = 0; i < _clients.size(); i++)
@@ -203,7 +201,6 @@ int Server::clientExistString(std::string name)
 	{
 		if (_clients[i]->getUser() == name || _clients[i]->getNick() == name)
 		{
-			std::cout << GREEN << "Client found: " << _clients[i]->getUser() << RESET << std::endl;
 			return (i);
 		}
 	}
@@ -283,6 +280,10 @@ void	Server::checkLogin(Client *client, int fd)
 				if (processCommand(user, fd))
 				{
 					std::cout << GREEN << "User applied" << RESET << std::endl;
+					_clients[clientExistFd(fd)]->sendMsg(RPL_WELCOME(_clients[clientExistFd(fd)]->getNick()));
+					_clients[clientExistFd(fd)]->sendMsg(RPL_YOURHOST(_clients[clientExistFd(fd)]->getNick(), "localhost",  "1.0"));
+					_clients[clientExistFd(fd)]->sendMsg(RPL_CREATED(_clients[clientExistFd(fd)]->getNick(), "-3000 av JC"));
+					_clients[clientExistFd(fd)]->setRegistered(true);
 				}
 				else
 				{
@@ -292,7 +293,7 @@ void	Server::checkLogin(Client *client, int fd)
 		}
 		else
 		{
-			std::cerr << BRED << ERR_PASSWDMISMATCH(pass) << RESET << std::endl;
+			client->sendMsg(ERR_PASSWDMISMATCH(pass.substr(0, 4)));
 			return;
 		}
 	}
@@ -332,6 +333,12 @@ void Server::receiveData(int fd)
 		if (processCommand(command, fd))
 		{
 			std::cout << GREEN << "Command applied" << RESET << std::endl;
+			if (!client->getUser().empty() && client->getRegistered() == false)
+			{
+				_clients[clientExistFd(fd)]->sendMsg(RPL_WELCOME(_clients[clientExistFd(fd)]->getNick()));
+				_clients[clientExistFd(fd)]->sendMsg(RPL_YOURHOST(_clients[clientExistFd(fd)]->getNick(), "localhost",  "1.0"));
+				_clients[clientExistFd(fd)]->sendMsg(RPL_CREATED(_clients[clientExistFd(fd)]->getNick(), "-3000 av JC"));
+			}
 		}
 		else
 		{
@@ -340,32 +347,28 @@ void Server::receiveData(int fd)
 	}
 }
 
+
 int	Server::processCommand(std::string command, int fd)
 {
 	std::istringstream iss(command);
 	std::string cmd;
 	iss >> cmd;
-	if (cmd.empty())
-	{
-		return 0;
-	}
-	iss >> command;
 	int clientIndex = clientExistFd(fd);
 	if (clientIndex == -1)
 	{
 		std::cerr << "No client found for fd " << fd << std::endl;
 		return 0;
 	}
-	const std::string commands[5] = { "USER", "NICK" , "MSG" , "JOIN", "PASS"};
+	const std::string commands[5] = { "USER", "NICK" , "PRIVMSG" , "JOIN", "PASS"};
 	int (Client::*functions[4])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan};
 
-	for (int i = 0; i < 4; i++) 
+	for (int i = 0; i < 5; i++) 
 	{
 		if (cmd == commands[i])
 		{
 			if (cmd == "PASS")
 			{
-				_clients[clientIndex]->sendMsg(ERR_ALREADYREGISTRED(command));
+				_clients[clientIndex]->sendMsg(ERR_ALREADYREGISTRED(cmd));
 				return 0;
 			}
 			if (_clients[clientIndex]->getNick().empty() && cmd != "NICK")

@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:48:40 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 16:48:32 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 21:14:34 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,9 @@ class Client
 
 		void		receiveMsg(std::string msg);
 		void		sendMsg(std::string msg);
+
+		void		setRegistered(bool registered);
+		bool		getRegistered();
 	
 	private:
 		Client();
@@ -53,6 +56,7 @@ class Client
 		std::string		_IPclient;
 		bool			_perms;
 		bool			_password;
+		bool			_registered;
 	
 };
 

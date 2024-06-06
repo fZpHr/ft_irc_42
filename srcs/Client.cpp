@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 17:32:51 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 23:18:28 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 Client::Client(Server *server) : _server(server)
 {
+	_registered = false;
 	_perms = false;
 	_password = false;
 	_username = "";
@@ -65,6 +66,19 @@ void	Client::sendMsg(std::string msg)
 	send(_clientFd, msg.c_str(), msg.size(), 0);
 }
 
+void	Client::setRegistered(bool registered)
+{
+	if (registered == true)
+		_registered = true;
+	else
+		_registered = false;
+}
+
+bool	Client::getRegistered()
+{
+	return (_registered);
+}
+
 int	Client::setUser(std::string name)
 {
 	std::istringstream iss(name);
@@ -81,7 +95,12 @@ int	Client::setUser(std::string name)
 	std::getline(iss, realname);
 	if (realname.empty() || realname[1] != ':')
 	{
-		std::cerr << RED << "Input error" << RESET << std::endl;
+		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
+		return 1;
+	}
+	if (_server->clientExistString(argument) != -1 && getUser() != argument)
+	{
+		sendMsg(ERR_ALREADYREGISTRED(argument));
 		return 1;
 	}
 	_username = argument;
@@ -91,11 +110,22 @@ int	Client::setUser(std::string name)
 int  Client::setNick(std::string nick)
 {
 	std::istringstream iss(nick);
+	std::string word;
 	std::string argument;
 	std::string error;
+	iss >> word;
 	iss >> argument;
 	iss >> error;
 
+	regex_t regex;
+	regcomp(&regex, REGEXNICKNAME, REG_EXTENDED);
+	if (regexec(&regex, argument.c_str(), 0, NULL, 0))
+	{
+		sendMsg(ERR_ERRONEUSNICKNAME(word, argument));
+		regfree(&regex);
+		return 1;
+	}
+	regfree(&regex);
 	if (!error.empty())
 	{
 		std::cerr << RED << "Input error: " << error << RESET << std::endl;
@@ -103,12 +133,12 @@ int  Client::setNick(std::string nick)
 	}
 	if (argument.empty())
 	{
-		sendMsg(ERR_NONICKNAMEGIVEN(argument));
+		sendMsg(ERR_NONICKNAMEGIVEN(word));
 		return 1;
 	}
-	if (_server->clientExistString(argument) != -1)
+	if (_server->clientExistString(argument) != -1 && getNick() != argument)
 	{
-		std::cerr << RED << ERR_NICKNAMEINUSE(argument, argument) << RESET << std::endl;
+		sendMsg(ERR_NICKNAMEINUSE(argument));
 		return 1;
 	}
 	_nickname = argument;
@@ -136,22 +166,35 @@ int	Client::prvMsg(std::string input)
 	iss >> msg;
 	iss >> error;
 
+
 	if (!error.empty() || msg.empty() || target.empty())
 	{
-		std::cerr << RED << "Input error" << RESET << std::endl;
+		if (msg.empty())
+			sendMsg(ERR_NOTEXTTOSEND(cmd));
+		else if (target.empty())
+			sendMsg(ERR_NORECIPIENT(cmd));
 		return 1;
 	}
 	int clientIndex = _server->clientExistString(target);
-	if (clientIndex != -1)
+	if (target.substr(0, 1) == "#")
 	{
-		_server->getClients()[clientIndex]->receiveMsg(msg);
-	}
-	else
-	{
-		std::cerr << RED << "Client does not exist: " << target << RESET << std::endl;
+		target = target.substr(1);
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == target)
+			{
+				// if (_server->getChannels()[i]->receiveMsg(msg))
+				// 	sendMsg(ERR_CANNOTSENDTOCHAN(cmd,target));
+				return 0;
+			}
+		}
+		sendMsg(ERR_NOSUCHCHANNEL(cmd,target));
 		return 1;
 	}
-	
+	if (clientIndex == -1)
+		sendMsg(ERR_NOSUCHNICK(cmd,target));
+	else
+		_server->getClients()[clientIndex]->receiveMsg(msg);
 	return 0;
 }
 
@@ -165,24 +208,41 @@ int	Client::joinChan(std::string target)
 	iss >> argument;
 	iss >> error;
 
-	if (!error.empty() || argument.empty())
+	if (!error.empty())
 	{
-		std::cerr << RED << "Input error: " << error << RESET << std::endl;
+		sendMsg(ERR_NEEDMOREPARAMS(word, word));
 		return 1;
 	}
-	if (!_server->channelExist(argument))
-    {
-        std::cerr << RED << "Channel does not exist: " << argument << RESET << std::endl;
-        return 1;
-    }
-	for (size_t i = 0; i < _server->getChannels().size(); i++)
+	if (argument.empty())
 	{
-		if (_server->getChannels()[i]->getName() == argument)
+		sendMsg(ERR_NEEDMOREPARAMS(word, word));
+		return 1;
+	}
+	if (_server->channelExist(argument))
+	{
+
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
 		{
-			_server->getChannels()[i]->addClient(this);
-			std::cout << "Client " << _nickname << " joined channel " << argument << std::endl;
-			//send();
+			argument = argument.substr(1);
+			if (_server->getChannels()[i]->getName() == argument)
+			{
+				_server->getChannels()[i]->addClient(this);
+				for (size_t j = 0; j < _server->getChannels()[i]->getUserList().size(); j++)
+					sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getUserList()[j]->getNick()));
+				sendMsg(RPL_NAMREPLY(_nickname, argument, _nickname));
+				sendMsg(RPL_ENDOFNAMES(_nickname, argument));
+				sendMsg(RPL_CHANNELMODEIS(_nickname, argument, ""));
+				sendMsg(RPL_NOTOPIC(_nickname, argument));
+			}
 		}
+	}
+	else
+	{
+		Channel *new_channel = new Channel();
+		new_channel->setName(argument);
+		new_channel->addClient(this);
+		_server->addChannel(new_channel);
+		sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
 	}
 	return 0;
 }

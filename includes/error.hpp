@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/05 16:19:54 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 15:11:15 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 18:51:36 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 # define ERR_UNKNOWNCOMMAND(input, cmd)			"421 " + input + " " + cmd + " :Unknown command"
 # define ERR_NONICKNAMEGIVEN(input)				"431 " + input + " :No nickname given"
 # define ERR_ERRONEUSNICKNAME(input, nick)		"432 " + input + " " + nick + " :Erroneous nickname"
-# define ERR_NICKNAMEINUSE(input, nick)			"433 " + input + " " + nick + " :Nickname is already in use"
+# define ERR_NICKNAMEINUSE(nick)				"433 * " + nick + " :Nickname is already in use"
 # define ERR_USERNOTINCHANNEL(input, nick, chn)	"441 " + input + " " + nick + " " + chn + " :They aren't on that channel"
 # define ERR_NOTONCHANNEL(input, chan)			"442 " + input + " " + chan + " :You're not on that channel"
 # define ERR_USERONCHANNEL(input, nick, chan)	"443 " + input + " " + nick + " " + chan + " :is already on channel"

@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 16:58:58 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 18:38:54 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@
 # include "Channel.hpp"
 # include "error.hpp"
 # include "response.hpp"
+# include "regex.hpp"
 
 // Parsing
 int handle_input(int ac, char **av);
