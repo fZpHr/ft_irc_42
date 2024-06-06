@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 22:17:16 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 17:27:38 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ class Server
 
 
 		int	checkPassword(std::string password);
-
 
 
 		//DEBUG PURPOSE

@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 16:52:03 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 17:28:42 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,8 @@ void Client::set_IPclient(std::string IPclient)
 
 void	Client::sendMsg(std::string msg)
 {
+	msg += "\r\n";
+	msg.insert(0, ":localhost ");
 	send(_clientFd, msg.c_str(), msg.size(), 0);
 }
 
@@ -189,7 +191,7 @@ int	Client::joinChan(std::string target)
 
 void	Client::receiveMsg(std::string msg)
 {
-	std::cout << msg << std::endl;
+	sendMsg(msg);
 }
 
 std::string	Client::getUser()

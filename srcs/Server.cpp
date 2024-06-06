@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 15:14:53 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/06 17:28:08 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -345,19 +345,29 @@ int	Server::processCommand(std::string command, int fd)
 	std::istringstream iss(command);
 	std::string cmd;
 	iss >> cmd;
+	if (cmd.empty())
+	{
+		return 0;
+	}
+	iss >> command;
 	int clientIndex = clientExistFd(fd);
 	if (clientIndex == -1)
 	{
 		std::cerr << "No client found for fd " << fd << std::endl;
 		return 0;
 	}
-	const std::string commands[4] = { "USER", "NICK" , "MSG" , "JOIN"};
+	const std::string commands[5] = { "USER", "NICK" , "MSG" , "JOIN", "PASS"};
 	int (Client::*functions[4])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan};
 
 	for (int i = 0; i < 4; i++) 
 	{
 		if (cmd == commands[i])
 		{
+			if (cmd == "PASS")
+			{
+				_clients[clientIndex]->sendMsg(ERR_ALREADYREGISTRED(command));
+				return 0;
+			}
 			if (_clients[clientIndex]->getNick().empty() && cmd != "NICK")
 			{
 				std::cerr << BRED << "Need to set Nick first for: " << fd - 3 << RESET << std::endl;
