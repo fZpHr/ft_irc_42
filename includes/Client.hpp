@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:48:40 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 16:42:17 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 16:48:32 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Client
 		bool		getPassword();
 
 		void		receiveMsg(std::string msg);
+		void		sendMsg(std::string msg);
 	
 	private:
 		Client();

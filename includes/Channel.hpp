@@ -27,6 +27,7 @@ class Channel
 		std::string		getName();
 		std::string		getTopic();
 		void			addClient(Client *client);
+		std::vector<Client *>	getUserList(void);
 		// void				setUserLimit(int limit);
 		// void				setPrivate(bool is_private);
 		// void				setPasswd(std::string passwd);

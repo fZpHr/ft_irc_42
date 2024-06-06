@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 15:15:10 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/06 16:52:03 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,11 @@ void Client::set_IPclient(std::string IPclient)
 	this->_IPclient = IPclient;
 }
 
+void	Client::sendMsg(std::string msg)
+{
+	send(_clientFd, msg.c_str(), msg.size(), 0);
+}
+
 int	Client::setUser(std::string name)
 {
 	std::istringstream iss(name);
@@ -71,15 +76,8 @@ int	Client::setUser(std::string name)
 	iss >> argument;
 	iss >> hostname;
 	iss >> servername;
-	iss >> realname;
-	iss >> error;
-
-	if (!error.empty())
-	{
-		std::cerr << RED << "Input error: " << error << RESET << std::endl;
-		return 1;
-	}
-	else if (realname.empty())
+	std::getline(iss, realname);
+	if (realname.empty() || realname[1] != ':')
 	{
 		std::cerr << RED << "Input error" << RESET << std::endl;
 		return 1;
@@ -98,9 +96,14 @@ int  Client::setNick(std::string nick)
 	iss >> argument;
 	iss >> error;
 
-	if (!error.empty() || argument.empty())
+	if (!error.empty())
 	{
 		std::cerr << RED << "Input error: " << error << RESET << std::endl;
+		return 1;
+	}
+	if (argument.empty())
+	{
+		sendMsg(ERR_NONICKNAMEGIVEN(argument));
 		return 1;
 	}
 	if (_server->clientExistString(argument) != -1)
@@ -178,7 +181,7 @@ int	Client::joinChan(std::string target)
 		{
 			_server->getChannels()[i]->addClient(this);
 			std::cout << "Client " << _nickname << " joined channel " << argument << std::endl;
-			send();
+			//send();
 		}
 	}
 	return 0;

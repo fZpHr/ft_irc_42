@@ -6,16 +6,16 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/06 14:58:56 by cpeterea          #+#    #+#             */
-/*   Updated: 2024/06/06 15:11:57 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 16:44:17 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 
-# define RPL_WELCOME(n)							"001 " + n + " :Welcome to the ft_irc Network " + n + "!"
-# define RPL_YOURHOST(n, serv, ver)				"002 " + n + " :Your host is " + serv + ", running version " + ver
-# define RPL_CREATED(n, date)					"003 " + n + " :This server was created " + date
+# define RPL_WELCOME(input)						"001 " + input + " :Welcome to the ft_irc Network " + input + "!"
+# define RPL_YOURHOST(input, serv, ver)			"002 " + input + " :Your host is " + serv + ", running version " + ver
+# define RPL_CREATED(input, date)				"003 " + input + " :This server was created " + date
 # define RPL_LISTSTART(input)					"321 " + input + " Channel :Users  Name"
 # define RPL_LIST(input, chan, users, topic)	"322 " + input + " " + chan + " " + users + " :" + topic
 # define RPL_LISTEND(input)						"323 " + input + " :End of /LIST"

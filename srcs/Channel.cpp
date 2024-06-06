@@ -54,6 +54,10 @@ void			Channel::addClient(Client* client)
 	_userList.push_back(client);
 }
 
+std::vector<Client *>	Channel::getUserList(void)
+{
+	return _userList;
+}
 
 // std::vector<Client>	Channel::getUserList(void){
 // 	return _user_list;
