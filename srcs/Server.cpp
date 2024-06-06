@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/05 22:17:41 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 14:55:03 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -289,6 +289,7 @@ void	Server::checkLogin(Client *client, int fd)
 					std::cout << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
 				}
 			}
+			send();
 		}
 		else
 		{
