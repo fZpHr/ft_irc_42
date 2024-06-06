@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 17:28:42 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/06 17:32:51 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,10 +91,8 @@ int	Client::setUser(std::string name)
 int  Client::setNick(std::string nick)
 {
 	std::istringstream iss(nick);
-	std::string word;
 	std::string argument;
 	std::string error;
-	iss >> word;
 	iss >> argument;
 	iss >> error;
 
