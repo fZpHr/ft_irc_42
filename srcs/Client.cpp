@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/07 13:46:24 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/07 22:08:12 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,48 +39,28 @@ Client &Client::operator=(Client const &rhs)
 	return (*this);
 }
 
-int		Client::get_fd() const
-{
-	return (_clientFd);
-}
-
-void	Client::set_fd(int fd)
-{
-	_clientFd = fd;
-}
-
-std::string Client::get_IPclient() const
-{
-	return (_IPclient);
-}
-
-void Client::set_IPclient(std::string IPclient)
-{
-	this->_IPclient = IPclient;
-}
-
-void	Client::sendMsg(std::string msg)
-{
-	msg += "\r\n";
-	msg.insert(0, ":localhost ");
-	send(_clientFd, msg.c_str(), msg.size(), 0);
-}
-
-void	Client::setRegistered(bool registered)
-{
-	if (registered == true)
-		_registered = true;
-	else
-		_registered = false;
-}
-
-bool	Client::getRegistered()
-{
-	return (_registered);
-}
+//##############################################################################################################
+//##############################################################################################################
+//##############################################################################################################
+//############################################COMMANDS CLIENT PART##############################################
+//##############################################################################################################
+//##############################################################################################################
+//##############################################################################################################
 
 int	Client::setUser(std::string name)
 {
+	// if (_password == false)
+	// {
+	// 	sendMsg(ERR_NOTREGISTERED(_nickname));
+	// 	std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must set a password first" << RESET << std::endl;
+	// 	return 1;
+	// }
+	// if (_nickname.empty())
+	// {
+	// 	sendMsg(ERR_NOTREGISTERED(_nickname));
+	// 	std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must set a nickname first" << RESET << std::endl;
+	// 	return 1;
+	// }
 	std::istringstream iss(name);
 	std::string cmd;
 	std::string argument;
@@ -93,14 +73,16 @@ int	Client::setUser(std::string name)
 	iss >> hostname;
 	iss >> servername;
 	std::getline(iss, realname);
+	if (_registered)
+	{
+		sendMsg(ERR_ALREADYREGISTRED(argument));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Can't change credential after being registered" << RESET << std::endl;
+		return 1;
+	}
 	if (realname.empty() || realname[1] != ':')
 	{
 		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
-		return 1;
-	}
-	if (_server->clientExistString(argument) != -1 && getUser() != argument)
-	{
-		sendMsg(ERR_ALREADYREGISTRED(argument));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Not enough parameters" << RESET << std::endl;
 		return 1;
 	}
 	_username = argument;
@@ -109,70 +91,88 @@ int	Client::setUser(std::string name)
 
 int  Client::setNick(std::string nick)
 {
+	// if (_password == false)
+	// {
+	// 	sendMsg(ERR_NOTREGISTERED(_nickname));
+	// 	std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must set a password first" << RESET << std::endl;
+	// 	return 1;
+	// }
 	std::istringstream iss(nick);
 	std::string word;
 	std::string argument;
 	std::string error;
 	iss >> word;
-	iss >> argument;
-	iss >> error;
-
+	getline(iss, argument);
+	argument = argument.substr(1);
 	regex_t regex;
-	regcomp(&regex, REGEXNICKNAME, REG_EXTENDED);
+	int ret;
+	ret = regcomp(&regex, REGEXNICKNAME, REG_EXTENDED);
+	if (ret) {
+		char msgbuf[100];
+		regerror(ret, &regex, msgbuf, sizeof(msgbuf));
+		std::cerr << BLACK << getCurrentTime() << "    " << "Regex error: " << msgbuf << std::endl;
+		return 1;
+	}
 	if (regexec(&regex, argument.c_str(), 0, NULL, 0))
 	{
 		sendMsg(ERR_ERRONEUSNICKNAME(word, argument));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Invalid nickname" << RESET << std::endl;
 		regfree(&regex);
 		return 1;
 	}
 	regfree(&regex);
 	if (!error.empty())
 	{
-		std::cerr << RED << "Input error: " << error << RESET << std::endl;
+		sendMsg(ERR_ERRONEUSNICKNAME(word, argument));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Too many arguments" << RESET << std::endl;
 		return 1;
 	}
 	if (argument.empty())
 	{
 		sendMsg(ERR_NONICKNAMEGIVEN(word));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No nickname given" << RESET << std::endl;
 		return 1;
 	}
 	if (_server->clientExistString(argument) != -1 && getNick() != argument)
 	{
 		sendMsg(ERR_NICKNAMEINUSE(argument));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Nickname already in use" << RESET << std::endl;
 		return 1;
 	}
 	_nickname = argument;
 	return 0;
 }
 
-void	Client::setPerms(bool perms)
-{
-	if (perms == true)
-		_perms = true;
-	else
-		_perms = false;
-}
-
 
 int	Client::prvMsg(std::string input)
 {
+	if (_username.empty())
+	{
+		sendMsg(ERR_NOTREGISTERED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
+		return 1;
+	}
 	std::istringstream iss(input);
 	std::string cmd;
 	std::string target;
 	std::string msg;
-	std::string error;
 	iss >> cmd;
 	iss >> target;
-	iss >> msg;
-	iss >> error;
+	std::getline(iss, msg);
 
 
-	if (!error.empty() || msg.empty() || target.empty())
+	if ( msg.empty() || target.empty())
 	{
 		if (msg.empty())
+		{
 			sendMsg(ERR_NOTEXTTOSEND(cmd));
-		else if (target.empty())
+			std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No text to send" << RESET << std::endl;
+		}
+		else
+		{
 			sendMsg(ERR_NORECIPIENT(cmd));
+			std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No recipient given" << RESET << std::endl;
+		}
 		return 1;
 	}
 	int clientIndex = _server->clientExistString(target);
@@ -189,10 +189,15 @@ int	Client::prvMsg(std::string input)
 			}
 		}
 		sendMsg(ERR_NOSUCHCHANNEL(cmd,target));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No such channel" << RESET << std::endl;
 		return 1;
 	}
 	if (clientIndex == -1)
+	{
 		sendMsg(ERR_NOSUCHNICK(cmd,target));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No such nick/channel" << RESET << std::endl;
+		return 1;
+	}
 	else
 		_server->getClients()[clientIndex]->receiveMsg(msg);
 	return 0;
@@ -200,6 +205,12 @@ int	Client::prvMsg(std::string input)
 
 int	Client::joinChan(std::string target)
 {
+	if (_username.empty())
+	{
+		sendMsg(ERR_NOTREGISTERED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
+		return 1;
+	}
 	std::istringstream iss(target);
 	std::string word;
 	std::string argument;
@@ -210,12 +221,13 @@ int	Client::joinChan(std::string target)
 
 	if (!error.empty())
 	{
-		sendMsg(ERR_NEEDMOREPARAMS(word, word));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Too many arguments" << RESET << std::endl;
 		return 1;
 	}
 	if (argument.empty())
 	{
 		sendMsg(ERR_NEEDMOREPARAMS(word, word));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Not enough parameters" << RESET << std::endl;
 		return 1;
 	}
 	if (_server->channelExist(argument))
@@ -262,6 +274,94 @@ int	Client::joinChan(std::string target)
 	return 0;
 }
 
+int	Client::setPassword(std::string command)
+{
+	std::istringstream iss(command);
+	std::string cmd;
+	std::string pass;
+	iss >> cmd;
+	getline(iss, pass);
+	pass = pass.substr(1);
+	if (_registered == true)
+	{
+		sendMsg(ERR_ALREADYREGISTRED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Can't change credential after being registered" << RESET << std::endl;
+		return 1;
+	}
+	else if (pass == _server->getPassword())
+	{
+		_password = true;
+		return 0;
+	}
+	else
+	{
+		sendMsg(ERR_PASSWDMISMATCH(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Password incorrect" << RESET << std::endl;
+		return 1;
+	}
+}
+
+//##############################################################################################################
+//##############################################################################################################
+//##############################################################################################################
+//############################################UTILS CLIENT PART#################################################
+//##############################################################################################################
+//##############################################################################################################
+//##############################################################################################################
+
+int	Client::setPerms()
+{
+	if (_perms == true)
+	{
+		sendMsg(ERR_ALREADYREGISTRED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You have already set permissions" << RESET << std::endl;
+		return 1;
+	}
+	_perms = true;
+	return 0;
+}
+
+int		Client::get_fd() const
+{
+	return (_clientFd);
+}
+
+void	Client::set_fd(int fd)
+{
+	_clientFd = fd;
+}
+
+std::string Client::get_IPclient() const
+{
+	return (_IPclient);
+}
+
+void Client::set_IPclient(std::string IPclient)
+{
+	this->_IPclient = IPclient;
+}
+
+void	Client::sendMsg(std::string msg)
+{
+	msg += "\r\n";
+	msg.insert(0, ":localhost ");
+	send(_clientFd, msg.c_str(), msg.size(), 0);
+}
+
+void	Client::setRegistered(bool registered)
+{
+	if (registered == true)
+		_registered = true;
+	else
+		_registered = false;
+}
+
+bool	Client::getRegistered()
+{
+	return (_registered);
+}
+
+
 void	Client::receiveMsg(std::string msg)
 {
 	sendMsg(msg);
@@ -285,12 +385,4 @@ bool	Client::getPerms()
 bool	Client::getPassword()
 {
 	return (_password);
-}
-
-void	Client::setPassword(bool password)
-{
-	if (password == true)
-		_password = true;
-	else
-		_password = false;
 }

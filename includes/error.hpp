@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/05 16:19:54 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 18:51:36 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/07 18:55:37 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 # define ERR_USERNOTINCHANNEL(input, nick, chn)	"441 " + input + " " + nick + " " + chn + " :They aren't on that channel"
 # define ERR_NOTONCHANNEL(input, chan)			"442 " + input + " " + chan + " :You're not on that channel"
 # define ERR_USERONCHANNEL(input, nick, chan)	"443 " + input + " " + nick + " " + chan + " :is already on channel"
+# define ERR_NOTREGISTERED(input)				"451 " + input + " :You have not registered"
 # define ERR_NEEDMOREPARAMS(input, cmd)			"461 " + input + " " + cmd + " :Not enough parameters"
 # define ERR_ALREADYREGISTRED(input)			"462 " + input + " :Unauthorized command (already registered)"
 # define ERR_PASSWDMISMATCH(input)				"464 " + input + " :Password incorrect"

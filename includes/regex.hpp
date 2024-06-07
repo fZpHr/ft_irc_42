@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/06 18:38:37 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 22:25:11 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/07 19:58:51 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #define REGEXHOST "^([^:]*)|(.*$)"
 #define REGEXHOSTNAME "^([a-zA-Z0-9-]*)(\\.([a-zA-Z0-9-]*))*$"
 #define REGEXHOSTADDR "^(([0-9]{1,3}\\.){3}[0-9]{1,3})|(([0-9a-fA-F]*:){7}[0-9a-fA-F]*)|0:0:0:0:0:(0|FFFF):(([0-9]{1,3}\\.){3}[0-9]{1,3})$"
-#define REGEXNICKNAME "^[a-zA-Z][a-zA-Z0-9-]{0,8}$"
+#define REGEXNICKNAME "^[a-zA-Z][a-zA-Z0-9_.-]{0,8}$"
 #define REGEXTARGETMASK "^[\\$#](.*)$"
 #define REGEXCHANSTRING "^[^\x00\x07\x0A\x0D ,:]*$"
 #define REGEXCHANNELID "^[A-Z0-9]{5}$"

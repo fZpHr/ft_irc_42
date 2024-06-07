@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:48:40 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 21:14:34 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/07 20:19:43 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,12 @@ class Client
 		std::string	getUser();
 		int			setNick(std::string nick);
 		std::string	getNick();
-		void			setPerms(bool perms);
+		int				setPerms();
 		bool			getPerms();
 		int			prvMsg(std::string input);
 		int			joinChan(std::string target);
 
-		void		setPassword(bool password);
+		int			setPassword(std::string command);
 		bool		getPassword();
 
 		void		receiveMsg(std::string msg);
@@ -44,6 +44,8 @@ class Client
 
 		void		setRegistered(bool registered);
 		bool		getRegistered();
+
+
 	
 	private:
 		Client();

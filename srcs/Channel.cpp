@@ -62,6 +62,7 @@ std::vector<Client *>	Channel::getUserList(void)
 
 int				Channel::setMod(std::string target)
 {
+	
 	(void)target;
 	std::cout << "cc mod" << std::endl;
 	return 0;

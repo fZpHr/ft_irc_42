@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 17:27:38 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/07 19:00:04 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class Server
 
 		static void signalHandler(int signal);
 
-		// int handleExecCommand(const std::string &command, int fd);
+		std::vector<std::string>	handleExecCommand(std::string &command);
 
 		void closeFds();
 		void clearClients(int fd);
@@ -49,8 +49,7 @@ class Server
 
 		int	processCommand(std::string command, int fd);
 
-
-		int	checkPassword(std::string password);
+		std::string getPassword();
 
 
 		//DEBUG PURPOSE
