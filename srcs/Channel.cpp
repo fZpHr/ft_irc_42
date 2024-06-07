@@ -59,6 +59,22 @@ std::vector<Client *>	Channel::getUserList(void)
 	return _userList;
 }
 
+
+int				Channel::setMod(std::string target)
+{
+	(void)target;
+	std::cout << "cc mod" << std::endl;
+	return 0;
+}
+
+int				Channel::setWho(std::string target)
+{
+
+	(void)target;
+	std::cout << "cc who" << std::endl;
+	return 0;
+}
+
 // std::vector<Client>	Channel::getUserList(void){
 // 	return _user_list;
 // }

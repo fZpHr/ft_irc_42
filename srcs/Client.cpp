@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/06 23:18:28 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/07 13:46:24 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,9 +220,9 @@ int	Client::joinChan(std::string target)
 	}
 	if (_server->channelExist(argument))
 	{
-
 		for (size_t i = 0; i < _server->getChannels().size(); i++)
 		{
+			std::string name = argument;
 			argument = argument.substr(1);
 			if (_server->getChannels()[i]->getName() == argument)
 			{
@@ -233,6 +233,13 @@ int	Client::joinChan(std::string target)
 				sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 				sendMsg(RPL_CHANNELMODEIS(_nickname, argument, ""));
 				sendMsg(RPL_NOTOPIC(_nickname, argument));
+				std::string msg = ":";
+				msg += _nickname;
+				msg += "!";
+				msg += _username;
+				msg += "@127.0.0.1 JOIN ";
+				msg += name;
+				sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
 			}
 		}
 	}
@@ -242,7 +249,15 @@ int	Client::joinChan(std::string target)
 		new_channel->setName(argument);
 		new_channel->addClient(this);
 		_server->addChannel(new_channel);
-		sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
+		// sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
+		std::string msg = ":";
+		msg += _nickname;
+		msg += "!";
+		msg += _username;
+		msg += "@127.0.0.1 JOIN ";
+		msg += argument;
+		msg += "\r\n";
+		send(_clientFd, msg.c_str(), msg.size(), 0);
 	}
 	return 0;
 }
