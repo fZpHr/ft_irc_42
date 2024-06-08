@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/07 13:46:24 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/07 17:42:29 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,22 +224,20 @@ int	Client::joinChan(std::string target)
 		{
 			std::string name = argument;
 			argument = argument.substr(1);
-			if (_server->getChannels()[i]->getName() == argument)
+			if (_server->getChannels()[i]->getName() == name)
 			{
 				_server->getChannels()[i]->addClient(this);
-				for (size_t j = 0; j < _server->getChannels()[i]->getUserList().size(); j++)
-					sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getUserList()[j]->getNick()));
-				sendMsg(RPL_NAMREPLY(_nickname, argument, _nickname));
+				sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getNicks()));
 				sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 				sendMsg(RPL_CHANNELMODEIS(_nickname, argument, ""));
 				sendMsg(RPL_NOTOPIC(_nickname, argument));
-				std::string msg = ":";
-				msg += _nickname;
-				msg += "!";
-				msg += _username;
-				msg += "@127.0.0.1 JOIN ";
-				msg += name;
-				sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
+				// std::string msg = ":";
+				// msg += _nickname;
+				// msg += "!";
+				// msg += _username;
+				// msg += "@127.0.0.1 JOIN ";
+				// msg += name;
+				// sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
 			}
 		}
 	}
@@ -258,6 +256,10 @@ int	Client::joinChan(std::string target)
 		msg += argument;
 		msg += "\r\n";
 		send(_clientFd, msg.c_str(), msg.size(), 0);
+		sendMsg(RPL_NAMREPLY(_nickname, argument, _nickname));
+		sendMsg(RPL_ENDOFNAMES(_nickname, argument));
+		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, ""));
+		sendMsg(RPL_NOTOPIC(_nickname, argument));
 	}
 	return 0;
 }

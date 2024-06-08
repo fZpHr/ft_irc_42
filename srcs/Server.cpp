@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/07 14:13:25 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/07 17:35:24 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -360,9 +360,9 @@ int	Server::processCommand(std::string command, int fd)
 		return 0;
 	}
 	const std::string commands[5] = { "USER", "NICK" , "PRIVMSG" , "JOIN", "PASS"};
-	const std::string channel_commands[2] = { "MODE", "WHO"};
+	// const std::string channel_commands[2] = { "MODE", "WHO"};
 	int (Client::*functions[4])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan};
-	int (Channel::*channel_functions[2])(std::string) = {&Channel::setMod, &Channel::setWho};
+	// int (Channel::*channel_functions[2])(std::string) = {&Channel::setMod, &Channel::setWho};
 	
 	for (int i = 0; i < 5; i++) 
 	{
@@ -389,25 +389,25 @@ int	Server::processCommand(std::string command, int fd)
 				return 1;
 		}
 	}
-	std::string target = command.substr(cmd.length() + 1);
-	target = target.substr(target.length() - 2);
-	for (int i = 0; i < 2; i++)
-	{
-		if (cmd == channel_commands[i])
-		{
-			for (size_t j = 0; j < _channels.size(); j++)
-			{
-				std::cout << target.c_str();
-				if (_channels[j]->getName() == "#General")
-				{
-					if ((_channels[j]->*channel_functions[i])(command))
-						return 0;
-					else 
-						return 1;
-				}
-			}
-		}
-	}
+	// std::string target = command.substr(cmd.length() + 1);
+	// target.find('\r');
+	// for (int i = 0; i < 2; i++)
+	// {
+	// 	if (cmd == channel_commands[i])
+	// 	{
+	// 		for (size_t j = 0; j < _channels.size(); j++)
+	// 		{
+	// 			std::cout << target.c_str();
+	// 			if (_channels[j]->getName() == "#General")
+	// 			{
+	// 				if ((_channels[j]->*channel_functions[i])(command))
+	// 					return 0;
+	// 				else 
+	// 					return 1;
+	// 			}
+	// 		}
+	// 	}
+	// }
 	return 0;
 }
 
@@ -446,7 +446,6 @@ int Server::channelExist(std::string name)
 		return (1);
 	if (name.length() == 1)
 		return (1);
-	name = name.substr(1, name.length());
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		if (_channels[i]->getName() == name)
