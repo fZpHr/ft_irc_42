@@ -60,20 +60,18 @@ std::vector<Client *>	Channel::getUserList(void)
 }
 
 
-int				Channel::setMod(std::string target)
+std::string				Channel::getNicks(void)
 {
-	
-	(void)target;
-	std::cout << "cc mod" << std::endl;
-	return 0;
-}
-
-int				Channel::setWho(std::string target)
-{
-
-	(void)target;
-	std::cout << "cc who" << std::endl;
-	return 0;
+	std::string list = "";
+	for (size_t i = 0; i < _userList.size(); i++)
+	{
+		if (i == 0)
+			list += "@";
+		list += _userList[i]->getNick();
+		list += " ";
+	}
+	std::cout << list << std::endl;
+	return (list);
 }
 
 // std::vector<Client>	Channel::getUserList(void){

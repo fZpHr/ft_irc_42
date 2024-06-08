@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/07 22:08:12 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/08 13:40:44 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,23 +235,24 @@ int	Client::joinChan(std::string target)
 		for (size_t i = 0; i < _server->getChannels().size(); i++)
 		{
 			std::string name = argument;
-			argument = argument.substr(1);
-			if (_server->getChannels()[i]->getName() == argument)
+			if (_server->getChannels()[i]->getName() == name)
 			{
 				_server->getChannels()[i]->addClient(this);
-				for (size_t j = 0; j < _server->getChannels()[i]->getUserList().size(); j++)
-					sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getUserList()[j]->getNick()));
-				sendMsg(RPL_NAMREPLY(_nickname, argument, _nickname));
-				sendMsg(RPL_ENDOFNAMES(_nickname, argument));
-				sendMsg(RPL_CHANNELMODEIS(_nickname, argument, ""));
-				sendMsg(RPL_NOTOPIC(_nickname, argument));
 				std::string msg = ":";
 				msg += _nickname;
 				msg += "!";
 				msg += _username;
 				msg += "@127.0.0.1 JOIN ";
-				msg += name;
-				sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
+				msg += argument;
+				msg += "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+				// sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getNicks()));
+				std::vector<Client *> lst = _server->getChannels()[i]->getUserList();
+				for (size_t j = 0; j != lst.size(); j++)
+					sendMsg(RPL_NAMREPLY(lst[j]->getNick(), argument, _server->getChannels()[i]->getNicks()));
+				sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
+				sendMsg(RPL_NOTOPIC(_nickname, argument));
+				sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 			}
 		}
 	}
@@ -270,6 +271,20 @@ int	Client::joinChan(std::string target)
 		msg += argument;
 		msg += "\r\n";
 		send(_clientFd, msg.c_str(), msg.size(), 0);
+		msg = ":";
+		msg += _nickname;
+		msg += "!";
+		msg += _username;
+		msg += "@127.0.0.1 MODE ";
+		msg += argument;
+		msg += " +o ";
+		msg += _nickname;
+		msg += "\r\n";
+		send(_clientFd, msg.c_str(), msg.size(), 0);
+		sendMsg(RPL_NAMREPLY(_nickname, argument, "@"+_nickname));
+		sendMsg(RPL_ENDOFNAMES(_nickname, argument));
+		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
+		sendMsg(RPL_NOTOPIC(_nickname, argument));
 	}
 	return 0;
 }
