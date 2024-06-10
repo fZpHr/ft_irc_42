@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/08 13:03:48 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/10 18:30:02 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ void Server::start()
 	{
 		if ((poll(_fds.data(), _fds.size(), -1) == -1) && Server::_signal == false ) // wait for events on the pollfd vector, -1 means infinite timeout
 			throw std::runtime_error("Poll failed");
-
 		for (size_t i = 0; i < _fds.size(); i++) // loop through the pollfd vector
 		{
 			if (_fds[i].revents & POLLIN) // if the returned events are POLLIN
@@ -73,6 +72,7 @@ void Server::start()
 		}
 	}
 	closeFds(); // close all clients and the server socket
+	freeClients(); // free the clients
 }
 
 void Server::socketCreation()
@@ -80,7 +80,7 @@ void Server::socketCreation()
 	struct sockaddr_in serverAddr; // create a sockaddr_in struct
 	/*struct sockaddr_in {
     	short            sin_family;   // e.g. AF_INET, AF_INET6
-    	unsigned short   sin_port;     // e.g. htons(3490)
+    	unsigned short   sin_port;     // e.g. htons(6667)
     	struct in_addr   sin_addr;     // see struct in_addr, below
 		sruct in_addr {
     		unsigned long s_addr;  // load with inet_aton()
@@ -102,7 +102,7 @@ void Server::socketCreation()
 
 	serverAddr.sin_family = AF_INET; // set family to IPV4
 	serverAddr.sin_port = htons(_port); // convert the port to network byte order
-	serverAddr.sin_addr.s_addr = INADDR_ANY; // set the address to any local address
+	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // set the address local address
 
 	int tmp = 1;
 	if (setsockopt(_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(int)) == -1) // set the socket to reuse the address immediatly 
@@ -136,7 +136,7 @@ void Server::socketCreation()
 //##############################################################################################################
 
 /**
- * @brief: Receive data from the client
+ * @brief: Accept a client connection
 */
 void Server::acceptClient()
 {
@@ -151,11 +151,13 @@ void Server::acceptClient()
 	if (clientFd == -1) // check if the client was accepted
 	{
 		std::cerr << BLACK << getCurrentTime() << "    " << "Accept failed" << std::endl;
+		delete newClient;
 		return;
 	}
 	if (fcntl(clientFd, F_SETFL, O_NONBLOCK) == -1) // set the client socket to non-blocking
 	{
 		std::cerr << BLACK << getCurrentTime() << "    " << "Fcntl failed" << std::endl;
+		delete newClient;
 		return;
 	}
 
@@ -188,6 +190,7 @@ void Server::receiveData(int fd)
 		std::cout << BLACK << getCurrentTime() << "    " << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
 		clearClients(fd); // remove the client from the pollfd vector and the client vector
 		close(fd); // close the client socket
+		delete client;
 		return;
 	}
 	buffer[ret] = '\0'; // add a null terminator to the buffer
@@ -246,6 +249,7 @@ int	Server::processCommand(std::string command, int fd)
 			std::cout << BLACK << getCurrentTime() << "    " << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
 			clearClients(fd);
 			close(fd);
+			delete _clients[clientIndex];
 			return 2;
 		}
 	}
@@ -484,10 +488,13 @@ std::string Server::getPassword()
 	return (_password);
 }
 
-
-
-
-
+void Server::freeClients()
+{
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		delete _clients[i];
+	}
+}
 
 
 

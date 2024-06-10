@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/07 19:00:04 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/10 17:47:51 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ class Server
 		int	processCommand(std::string command, int fd);
 
 		std::string getPassword();
+
+		void freeClients();
 
 
 		//DEBUG PURPOSE
