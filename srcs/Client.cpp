@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/08 14:40:24 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/10 17:03:24 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,13 +73,14 @@ int	Client::setUser(std::string name)
 	iss >> hostname;
 	iss >> servername;
 	std::getline(iss, realname);
+	realname = realname.substr(1);
 	if (_registered)
 	{
 		sendMsg(ERR_ALREADYREGISTRED(argument));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Can't change credential after being registered" << RESET << std::endl;
 		return 1;
 	}
-	if (realname.empty() || realname[1] != ':')
+	if (realname.empty() || realname[0] != ':')
 	{
 		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Not enough parameters" << RESET << std::endl;
@@ -159,8 +160,7 @@ int	Client::prvMsg(std::string input)
 	iss >> cmd;
 	iss >> target;
 	std::getline(iss, msg);
-
-
+	msg = msg.substr(1);
 	if ( msg.empty() || target.empty())
 	{
 		if (msg.empty())
@@ -199,7 +199,14 @@ int	Client::prvMsg(std::string input)
 		return 1;
 	}
 	else
-		_server->getClients()[clientIndex]->receiveMsg(msg);
+	{
+		std::string realsend;
+		if (msg[0] == ':')
+			realsend += ":" + _nickname + "!" + _username + "@localhost PRIVMSG " + target + " " + msg + "\r\n";
+		else
+			realsend += ":" + _nickname + "!" + _username + "@localhost PRIVMSG " + target + " :" + msg + "\r\n";
+		send(_server->getClients()[clientIndex]->get_fd(), realsend.c_str(), realsend.size(), 0);
+	}
 	return 0;
 }
 
@@ -332,6 +339,7 @@ int	Client::setPassword(std::string command)
 //##############################################################################################################
 //##############################################################################################################
 //##############################################################################################################
+
 
 int	Client::setPerms()
 {
