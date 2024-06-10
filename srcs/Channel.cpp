@@ -4,7 +4,6 @@ Channel::Channel()
 {
 	_id = 0;
 	_topic = "";
-	_is_private = false;
 	_user_limit = 0;
 	_passwd = "";
 	_has_passwd = false;
@@ -13,18 +12,6 @@ Channel::Channel()
 	_limit_user_mod = false;
 }
 
-Channel::Channel(bool pv){
-	_id = 0;
-	_topic = "";
-	_is_private = pv;
-	_user_limit = 0;
-	_passwd = "";
-	_has_passwd = false;
-	_invite_only = false;
-	_topic_mod = false;
-	_limit_user_mod = false;
-
-}
 Channel::~Channel()
 {
 }

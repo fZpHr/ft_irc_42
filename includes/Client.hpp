@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:48:40 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/10 15:15:23 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/10 17:15:47 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Client
 		bool			getPerms();
 		int			prvMsg(std::string input);
 		int			joinChan(std::string target);
+		int			kick(std::string target);
 
 		int			setPassword(std::string command);
 		bool		getPassword();
