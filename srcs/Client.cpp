@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/10 18:38:40 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/10 21:02:25 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -277,6 +277,7 @@ int	Client::joinChan(std::string target)
 		Channel *new_channel = new Channel();
 		new_channel->setName(argument);
 		new_channel->addClient(this);
+		new_channel->addUserMod(this);
 		_server->addChannel(new_channel);
 		// sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
 		std::string msg = ":";
@@ -302,6 +303,21 @@ int	Client::joinChan(std::string target)
 		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
 		sendMsg(RPL_NOTOPIC(_nickname, argument));
 	}
+	return 0;
+}
+
+int Client::leaveChan(std::string target)
+{
+	
+	(void)target;
+	return 0;
+}
+
+int Client::kickChan(std::string target, std::string channel, std::string reason)
+{
+	(void)target;
+	(void)channel;
+	(void)reason;
 	return 0;
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/10 18:30:02 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/10 21:00:52 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,11 +228,10 @@ int	Server::processCommand(std::string command, int fd)
 	std::string cmd;
 	iss >> cmd;
 	int clientIndex = clientExistFd(fd);
-	const std::string commands[5] = { "USER", "NICK" , "PRIVMSG" , "JOIN", "PASS"};
-	const std::string channel_commands[2] = { "MODE", "WHO"};
-	int (Client::*functions[5])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan, &Client::setPassword};
+	const std::string commands[7] = { "USER", "NICK" , "PRIVMSG" , "JOIN", "PASS", "PART"};
+	int (Client::*functions[7])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan, &Client::setPassword, &Client::leaveChan};
 
-	for (int i = 0; i < 5; i++) 
+	for (int i = 0; i < 7; i++) 
 	{
 		if (cmd == commands[i])
 		{
@@ -251,7 +250,10 @@ int	Server::processCommand(std::string command, int fd)
 			close(fd);
 			delete _clients[clientIndex];
 			return 2;
-		}
+		}// else if (cmd == "KICK")
+		// {
+		// 	_clients[clientIndex]->kickChan();
+		// }
 	}
 	return 0;
 }

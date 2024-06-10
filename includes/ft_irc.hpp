@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_irc.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/07 22:01:04 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/10 21:01:25 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@
 #define LIGHT "\033[1m"
 #define DARK "\033[2m"
 #define BOLD "\033[1m"
-#define BLACK "\033[0;30m"
+#define BLACK "\033[0;90m"
 #define RED "\033[0;31m"
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"

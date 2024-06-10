@@ -46,6 +46,16 @@ std::vector<Client *>	Channel::getUserList(void)
 	return _userList;
 }
 
+std::vector<Client *>	Channel::getUserMod(void)
+{
+	return _mod;
+}
+
+void					Channel::addUserMod(Client *target)
+{
+	_mod.push_back(target);
+}
+
 
 std::string				Channel::getNicks(void)
 {
