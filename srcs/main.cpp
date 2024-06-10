@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/07 22:04:17 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/10 18:24:37 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,6 @@ int main(int ac, char **av)
 		std::cerr << e.what() << '\n';
 	}
 	
-	std::cout << YELLOW << "Server is closing" << RESET << std::endl;
+	std::cout << BLACK << getCurrentTime() << "    " << YELLOW << "Server is closing" << RESET << std::endl;
 	return (0);
 }
