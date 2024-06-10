@@ -70,7 +70,6 @@ std::string				Channel::getNicks(void)
 		list += _userList[i]->getNick();
 		list += " ";
 	}
-	std::cout << list << std::endl;
 	return (list);
 }
 

@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/08 13:40:44 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/08 14:40:24 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,13 +246,22 @@ int	Client::joinChan(std::string target)
 				msg += argument;
 				msg += "\r\n";
 				send(_clientFd, msg.c_str(), msg.size(), 0);
-				// sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getNicks()));
 				std::vector<Client *> lst = _server->getChannels()[i]->getUserList();
 				for (size_t j = 0; j != lst.size(); j++)
-					sendMsg(RPL_NAMREPLY(lst[j]->getNick(), argument, _server->getChannels()[i]->getNicks()));
+				{
+					std::string msg = ":";
+					msg += _nickname;
+					msg += "!";
+					msg += _username;
+					msg += "@127.0.0.1 JOIN ";
+					msg += argument;
+					msg += "\r\n";
+					send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
+				}
+				sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getNicks()));
+				sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 				sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
 				sendMsg(RPL_NOTOPIC(_nickname, argument));
-				sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 			}
 		}
 	}
