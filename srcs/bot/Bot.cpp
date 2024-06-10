@@ -6,7 +6,7 @@
 /*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:28:02 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/10 19:36:27 by bberkrou         ###   ########.fr       */
+/*   Updated: 2024/06/10 20:14:01 by bberkrou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,17 +68,20 @@ bool Bot::is_cmd(const std::string &msg, std::string &command) {
 }
 
 void Bot::apply_cmd(const std::string &command) {
+	std::string cmd = command;
     std::cout << "cmd list \n";
 
     for (std::map<std::string, CommandFunction>::iterator it = commands.begin(); it != commands.end(); ++it) {
         std::cout << "[" << it->first << "]" << std::endl;
     }
 
-    std::cout << "cmd received : [" << command << "]" << std::endl;
+    std::cout << "cmd received : [" << cmd << "]" << std::endl;
 
-    std::cout << "clean cmd received : [" << command << "]" << std::endl;
+	cmd.erase(std::remove(cmd.begin(), cmd.end(), '\r'), cmd.end());
 
-    std::map<std::string, CommandFunction>::iterator it = commands.find(command);
+    std::cout << "clean cmd received : [" << cmd << "]" << std::endl;
+
+    std::map<std::string, CommandFunction>::iterator it = commands.find(cmd);
     if (it != commands.end()) {
         CommandFunction func = it->second;
         std::string response = (this->*func)();

@@ -6,7 +6,7 @@
 /*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:26:46 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/10 19:09:53 by bberkrou         ###   ########.fr       */
+/*   Updated: 2024/06/10 20:12:58 by bberkrou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,7 @@
 # include <unistd.h>
 # include <map>
 # include <exception>
-# include <cstring>
-# include <cerrno>
-# include <sstream>
+# include <algorithm>
 
 # define PURPLE "\033[35m"
 # define RED    "\033[31m"

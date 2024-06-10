@@ -6,11 +6,12 @@
 /*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:27:56 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/10 19:30:26 by bberkrou         ###   ########.fr       */
+/*   Updated: 2024/06/10 20:09:33 by bberkrou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Bot.hpp"
+#include "TicTacToe.hpp"
 
 int main(int argc, char **argv)
 {
@@ -35,3 +36,16 @@ int main(int argc, char **argv)
 
     return (0);
 }
+
+// int main(void) {
+// 	TicTacToe game;
+
+// 	std::cout << game.play(0, 0, 'X') << std::endl;
+// 	std::cout << game.play(0, 0, 'X') << std::endl;
+// 	std::cout << game.play(0, 1, 'X') << std::endl;
+// 	game.resetBoard();
+// 	std::cout << game.play(1, 0, '#') << std::endl;
+// 	std::cout << game.play(0, 2, 'X') << std::endl;
+
+	
+// }
