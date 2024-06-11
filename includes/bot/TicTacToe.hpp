@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   TicTacToe.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 19:38:12 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/10 20:01:09 by bberkrou         ###   ########.fr       */
+/*   Updated: 2024/06/11 16:58:18 by ben              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 
 # include <iostream>
 # include <string>
+# include <algorithm>
+# include <limits.h>
+#include <sstream>
+
 
 class TicTacToe
 {
@@ -22,17 +26,43 @@ class TicTacToe
 		TicTacToe();
 		TicTacToe(const TicTacToe &src);
 		~TicTacToe();
-
 		TicTacToe &operator=(const TicTacToe &rhs);
 
-		std::string play(int row, int col, char player);
+		std::string			play(std::string move, char player);
+		std::string			getBoard() const;
+		void				resetBoard();
 		
-		bool makeMove(int row, int col, char player);
-		bool checkWin(char player);                  
-		void resetBoard();
-		std::string getBoard();
 	private:
+		// Data PART
 		char board[3][3];
+		std::pair<int, int> findBestMove();
+
+		// Game PART
+		bool 				makeMove(int row, int col, char player);
+		std::pair<int, int> getCorrMove(const std::string& move) const;
+		
+		bool 				checkWin(char player) const;
+		bool 				isNull() const;
+		bool 				checkWinRows(char player) const;
+		bool 				checkWinColumns(char player) const;
+		bool 				checkWinDiagonals(char player) const;
+		
+		std::string 		handlePlayerWin(char player) const;
+		std::string 		handleAIMove(char player);
+		std::string 		convertToString(int num) const;
+
+		// IA PART
+		int 				evaluate(char board[3][3]) const;
+		int 				evaluateLines(char board[3][3]) const;
+		int 				evaluateColumns(char board[3][3]) const;
+		int 				evaluateDiagonals(char board[3][3]) const;
+
+		int 				minimax(char board[3][3], int depth, bool isMax);
+		bool				areMovesLeft(char board[3][3]) const;
+		int 				getMaxScore(char board[3][3], int depth);
+		int 				getMinScore(char board[3][3], int depth);
+
+		bool				isValideMove(std::string move) const;
 };
 
 #endif

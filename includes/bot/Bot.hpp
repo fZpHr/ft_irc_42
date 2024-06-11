@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Bot.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:26:46 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/10 20:12:58 by bberkrou         ###   ########.fr       */
+/*   Updated: 2024/06/11 14:25:24 by ben              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <map>
 # include <exception>
 # include <algorithm>
+# include <poll.h>
 
 # define PURPLE "\033[35m"
 # define RED    "\033[31m"
@@ -41,8 +42,7 @@ class Bot
 
 		Bot &operator=(const Bot &rhs);
 
-		void connect(const char *address, const char *port, const char *password);
-		void disconnect();
+		void connect(const std::string &address, const std::string &port, const std::string &password);
 		void run();
 
 
@@ -52,6 +52,19 @@ class Bot
         std::string address;
         std::string port;
         std::string password;
+
+		// Connection functions
+		void createSocket();
+		void setupAddressStruct(const std::string &address, const std::string &port, struct sockaddr_in &serv_addr);
+		void connectToServer(struct sockaddr_in &serv_addr);
+		void sendCredentials();
+		void handleServerResponse();
+		void disconnect();
+
+		// Handle message functions
+		bool waitForServerResponse();
+		int readServerResponse(char *buffer, int size);
+		void handleServerResponse(char *buffer, int size);
 
 		typedef std::string (Bot::*CommandFunction)();
 		std::map<std::string, CommandFunction> commands;
