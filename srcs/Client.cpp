@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/11 15:47:09 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/11 16:00:09 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,8 +182,19 @@ int	Client::prvMsg(std::string input)
 		{
 			if (_server->getChannels()[i]->getName() == target)
 			{
-				// if (_server->getChannels()[i]->receiveMsg(msg))
-				// 	sendMsg(ERR_CANNOTSENDTOCHAN(cmd,target));
+				for (size_t j = 0; j < _server->getChannels()[i]->getUserList().size(); j++)
+				{
+					if (_server->getChannels()[i]->getUserList()[j]->getNick() != _nickname)
+					{
+						std::string realsend;
+						if (msg[0] == ':')
+							realsend += ":" + _nickname + "!" + _username + "@localhost PRIVMSG " + target + " " + msg + "\r\n";
+						else
+							realsend += ":" + _nickname + "!" + _username + "@localhost PRIVMSG " + target + " :" + msg + "\r\n";
+						send(_server->getChannels()[i]->getUserList()[j]->get_fd(), realsend.c_str(), realsend.size(), 0);
+						return 0;
+					}
+				}
 				return 0;
 			}
 		}
