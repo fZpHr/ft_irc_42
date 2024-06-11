@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/10 21:02:25 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/11 15:47:09 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ int  Client::setNick(std::string nick)
 
 int	Client::prvMsg(std::string input)
 {
-	if (_username.empty())
+	if (_username.empty() || _nickname.empty() || _password == false)
 	{
 		sendMsg(ERR_NOTREGISTERED(_nickname));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
@@ -178,7 +178,6 @@ int	Client::prvMsg(std::string input)
 	int clientIndex = _server->clientExistString(target);
 	if (target.substr(0, 1) == "#")
 	{
-		target = target.substr(1);
 		for (size_t i = 0; i < _server->getChannels().size(); i++)
 		{
 			if (_server->getChannels()[i]->getName() == target)
@@ -212,7 +211,7 @@ int	Client::prvMsg(std::string input)
 
 int	Client::joinChan(std::string target)
 {
-	if (_username.empty())
+	if (_username.empty() || _nickname.empty() || _password == false)
 	{
 		sendMsg(ERR_NOTREGISTERED(_nickname));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
@@ -308,7 +307,13 @@ int	Client::joinChan(std::string target)
 
 int Client::leaveChan(std::string target)
 {
-	std::cout << target << std::endl;
+	if (_username.empty() || _nickname.empty() || _password == false)
+	{
+		sendMsg(ERR_NOTREGISTERED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
+		return 1;
+	}
+	(void)target;
 	return 0;
 }
 
