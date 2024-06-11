@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/10 21:02:25 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/11 15:42:38 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,9 +178,10 @@ int	Client::prvMsg(std::string input)
 	int clientIndex = _server->clientExistString(target);
 	if (target.substr(0, 1) == "#")
 	{
-		target = target.substr(1);
+		std::cout << "target: " << target << std::endl;
 		for (size_t i = 0; i < _server->getChannels().size(); i++)
 		{
+			std::cout << "channel: " << _server->getChannels()[i]->getName() << std::endl;
 			if (_server->getChannels()[i]->getName() == target)
 			{
 				// if (_server->getChannels()[i]->receiveMsg(msg))
