@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/11 15:43:57 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/11 15:47:09 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ int  Client::setNick(std::string nick)
 
 int	Client::prvMsg(std::string input)
 {
-	if (_username.empty())
+	if (_username.empty() || _nickname.empty() || _password == false)
 	{
 		sendMsg(ERR_NOTREGISTERED(_nickname));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
@@ -211,7 +211,7 @@ int	Client::prvMsg(std::string input)
 
 int	Client::joinChan(std::string target)
 {
-	if (_username.empty())
+	if (_username.empty() || _nickname.empty() || _password == false)
 	{
 		sendMsg(ERR_NOTREGISTERED(_nickname));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
@@ -307,7 +307,12 @@ int	Client::joinChan(std::string target)
 
 int Client::leaveChan(std::string target)
 {
-	
+	if (_username.empty() || _nickname.empty() || _password == false)
+	{
+		sendMsg(ERR_NOTREGISTERED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
+		return 1;
+	}
 	(void)target;
 	return 0;
 }
