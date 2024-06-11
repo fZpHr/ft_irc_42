@@ -308,8 +308,7 @@ int	Client::joinChan(std::string target)
 
 int Client::leaveChan(std::string target)
 {
-	
-	(void)target;
+	std::cout << target << std::endl;
 	return 0;
 }
 
