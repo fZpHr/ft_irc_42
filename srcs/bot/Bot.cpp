@@ -6,7 +6,7 @@
 /*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:28:02 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 20:56:59 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/11 22:13:11 by ben              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ Bot::~Bot() {
 Bot &Bot::operator=(const Bot &rhs) {
 	if (this != &rhs) {
         this->sockfd = rhs.sockfd;
-        this->connected = rhs.connected;
+        this->connected = false;
         this->address = rhs.address;
         this->port = rhs.port;
         this->password = rhs.password;
@@ -53,94 +53,171 @@ Bot &Bot::operator=(const Bot &rhs) {
 // ========================================== Commands PART ==========================================
 // ===================================================================================================
 
+/**
+ * @brief Starts a new Tic Tac Toe game for the user.
+ * 
+ * If the user does not already have an ongoing game, this function initializes a new game and 
+ * provides the game board. If a game is already in progress, it informs the user.
+ * 
+ * @param username The username of the player.
+ * @param args Unused parameter.
+ * @return A string containing the game board or an appropriate message.
+ */
 std::string Bot::tictactoe(const std::string &username, const std::string &args) {
     if (games.find(username) == games.end()) {
         games[username] = TicTacToe();
         return ("===== Game started =====\r\n" + games[username].getBoard() + "\r\n" + "\tMake your move {!play row-col}\r\n");
     }
-    return "===== Game already started =====\r\n\tMake your move {!play row-col}\r\n";
+    return ("===== Game already started =====\r\n\tMake your move {!play row-col}\r\n");
 }
 
+/**
+ * @brief Makes a move in the ongoing Tic Tac Toe game.
+ * 
+ * This function allows the user to make a move by specifying the row and column. 
+ * If no game is currently active, it prompts the user to start a new game.
+ * 
+ * @param username The username of the player.
+ * @param args The move specified as row-col (e.g. "1-1").
+ * @return A string containing the result of the move or an appropriate message.
+ */
 std::string Bot::play(const std::string &username, const std::string &args) {
-    std::cout << "Args: [" << args << "]" << std::endl;
     if (games.find(username) != games.end()) {
-        std::string response = games[username].play(args, 'X');
-        return response;
+        std::string answer = games[username].play(args, 'X');
+        return (answer);
     }
-    return "===== No game started, type !tictactoe to start a game ===== \r\n";
+    return ("===== No game started, type !tictactoe to start a game ===== \r\n");
 }
 
+/**
+ * @brief Restarts the current Tic Tac Toe game.
+ * 
+ * If a game is ongoing, this function resets the game board and allows the user to start over. 
+ * If no game is active, it prompts the user to start a new game.
+ * 
+ * @param username The username of the player.
+ * @param args Unused parameter.
+ * @return A string containing the new game board or an appropriate message.
+ */
 std::string Bot::restart(const std::string &username, const std::string &args) {
     if (games.find(username) != games.end()) {
         games[username].resetBoard();
         return ("===== Game restarted =====\r\n" + games[username].getBoard() + "\r\n" + "\tMake your move {!play row-col}\r\n");
     }
-    return "===== No game started, type !tictactoe to start a game =====\r\n";
+    return ("===== No game started, type !tictactoe to start a game =====\r\n");
 }
 
 // ===================================================================================================
 // ======================================== Help Commands PART =======================================
 // ===================================================================================================
 
+/**
+ * @brief Provides help information for commands.
+ * 
+ * Depending on the arguments provided, this function returns a general list of commands 
+ * or specific information about a particular command.
+ * 
+ * @param username The username of the requester.
+ * @param args The command for which help is requested.
+ * @return A string containing the help information.
+ */
 std::string Bot::help(const std::string &username, const std::string &args) {
 
     if (args.empty())
-        return help_list(username, args);
+        return (help_list(username, args));
     if (args == "tictactoe")
-        return help_tictactoe(username, args);
+        return (help_tictactoe(username, args));
     if (args == "play")
-        return help_play(username, args);
+        return (help_play(username, args));
     if (args == "restart")
-        return help_restart(username, args);
+        return (help_restart(username, args));
     else
-        return "No information for this cmd [" + args + "]\n";
+        return ("No information for this cmd [" + args + "]\n");
 }
 
+/**
+ * @brief Provides a list of all available commands.
+ * 
+ * This function generates a list of all commands registered in the bot, along with a brief 
+ * description of each command. It also instructs users on how to get more information about 
+ * a specific command.
+ * 
+ * @param username The username of the requester.
+ * @param args Unused parameter.
+ * @return A string containing the list of commands.
+ */
 std::string Bot::help_list(const std::string &username, const std::string &args) {
-    std::string response = "\n================ Cmd list ================\r\n";
+    std::string answer = "\n================ Cmd list ================\r\n";
     for (std::map<std::string, t_data_func>::iterator it = commands.begin(); it != commands.end(); ++it) {
-        response += "\t[" + it->first + "] => {" + it->second.description + "}\r\n";
+        answer += "\t[" + it->first + "] => {" + it->second.description + "}\r\n";
     }
-    response += "==========================================\r\n";
-    response += "For more information about a command, type !help <command>\r\n";
-    response += "==========================================\r\n";
-    return (response);
+    answer += "==========================================\r\n";
+    answer += "For more information about a command, type !help <command>\r\n";
+    answer += "==========================================\r\n";
+    return (answer);
 }
 
+/**
+ * @brief Provides help information for the !tictactoe command.
+ * 
+ * This function explains the rules of Tic Tac Toe and instructs users on how to play the game 
+ * using the bot.
+ * 
+ * @param username The username of the requester.
+ * @param args Unused parameter.
+ * @return A string containing the help information for the !tictactoe command.
+ */
 std::string Bot::help_tictactoe(const std::string &username, const std::string &args) {
-    std::string response = "=================== Help TicTacToe ===================\r\n";
-    response += "\tThe game is played on a 3x3 grid.\r\n";
-    response += "\tYou are X, IA is O. Players take turns putting their marks in empty squares.\r\n";
-    response += "\tThe first player to get 3 of her marks in a row (up, down, across, or diagonally) is the winner.\r\n";
-    response += "\tWhen all 9 squares are full, the game is over. If no player has 3 marks in a row, the game ends in a tie.\r\n";
-    response += "\tTo make a move, type !play row-col (e.g. !play 1-1)\r\n";
-    response += "\tTo restart the game, type !restart\r\n";
-    return response;
+    std::string answer = "=================== Help TicTacToe ===================\r\n";
+    answer += "\tThe game is played on a 3x3 grid.\r\n";
+    answer += "\tYou are X, IA is O. Players take turns putting their marks in empty squares.\r\n";
+    answer += "\tThe first player to get 3 of her marks in a row (up, down, across, or diagonally) is the winner.\r\n";
+    answer += "\tWhen all 9 squares are full, the game is over. If no player has 3 marks in a row, the game ends in a tie.\r\n";
+    answer += "\tTo make a move, type !play row-col (e.g. !play 1-1)\r\n";
+    answer += "\tTo restart the game, type !restart\r\n";
+    return (answer);
 }
 
+/**
+ * @brief Provides help information for the !play command.
+ * 
+ * This function instructs users on how to make a move in the Tic Tac Toe game using the bot.
+ * 
+ * @param username The username of the requester.
+ * @param args Unused parameter.
+ * @return A string containing the help information for the !play command.
+ */
 std::string Bot::help_play(const std::string &username, const std::string &args) {
-    std::string response = "=================== Help Play ===================\r\n";
-    response += "\tTo make a move, type !play row-col (e.g. !play 1-1)\r\n";
-    return response;
+    std::string answer = "=================== Help Play ===================\r\n";
+    answer += "\tTo make a move, type !play row-col (e.g. !play 1-1)\r\n";
+    return (answer);
 }
 
+/**
+ * @brief Provides help information for the !restart command.
+ * 
+ * This function instructs users on how to restart the Tic Tac Toe game using the bot.
+ * 
+ * @param username The username of the requester.
+ * @param args Unused parameter.
+ * @return A string containing the help information for the !restart command.
+ */
 std::string Bot::help_restart(const std::string &username, const std::string &args) {
-    std::string response = "=================== Help Restart ===================\r\n";
-    response += "\tTo restart the game, type !restart\r\n";
-    return response;
+    std::string answer = "=================== Help Restart ===================\r\n";
+    answer += "\tTo restart the game, type !restart\r\n";
+    return (answer);
 }
 
 // ===================================================================================================
 // ======================================= Utils Commands PART =======================================
 // ===================================================================================================
 
-void Bot::addCommand(const std::string& command_name, const std::string& description, CommandFunction func) {
-    t_data_func command_data;
-    command_data.description = description;
-    command_data.func = func;
-    commands[command_name] = command_data;
-}
-
+/**
+ * @brief Initializes the bot's commands.
+ * 
+ * This function registers all available commands that the bot can execute. Each command
+ * is associated with a description and a corresponding member function that handles the command.
+ */
 void Bot::initCommands() {
     addCommand("!tictactoe", "Play at TicTacToe with a IA.", &Bot::tictactoe);
     addCommand("!play", "Make a move at TicTacToe", &Bot::play);
@@ -148,19 +225,56 @@ void Bot::initCommands() {
     addCommand("!help", "Display all available commands.", &Bot::help);
 }
 
+/**
+ * @brief Adds a command to the bot's command list.
+ * 
+ * This function adds a new command to the bot's internal command map. Each command
+ * is stored with its name, description, and the member function that handles the command.
+ * 
+ * @param command_name The name of the command.
+ * @param description A brief description of what the command does.
+ * @param func The member function that handles the command.
+ */
+void Bot::addCommand(const std::string& command_name, const std::string& description, CommandFunction func) {
+    t_data_func command_data;
+    command_data.description = description;
+    command_data.func = func;
+    commands[command_name] = command_data;
+}
 
+/**
+ * @brief Checks if a message is a command.
+ * 
+ * This function checks if a given message contains a command. If a command is found,
+ * it extracts the command from the message.
+ * 
+ * @param msg The message string to be checked.
+ * @param command A reference to a string where the extracted command will be stored.
+ * @return true If the message contains a command.
+ * @return false If the message does not contain a command.
+ */
 bool Bot::is_cmd(const std::string &msg, std::string &command) {
     size_t pos = msg.find("PRIVMSG");
     if (pos != std::string::npos) {
         size_t cmd_start = msg.find(":", pos);
         if (cmd_start != std::string::npos) {
             command = msg.substr(cmd_start + 1);
-            return true;
+            return (true);
         }
     }
-    return false;
+    return (false);
 }
 
+/**
+ * @brief Sends a message to a user in multiple parts if necessary.
+ * 
+ * This function takes a message string and a username, splits the message by newline characters,
+ * and sends each part as a separate message to the user. It constructs the message in the format
+ * required by the IRC protocol and sends it through the socket.
+ * 
+ * @param msg The message string to be sent.
+ * @param username The username of the recipient.
+ */
 void Bot::sendMsg(std::string msg, const std::string &username) {
     std::vector<std::string> messages;
 
@@ -177,25 +291,74 @@ void Bot::sendMsg(std::string msg, const std::string &username) {
     }
 }
 
+/**
+ * @brief Displays the received command in a formatted manner.
+ * 
+ * This function formats and displays the received command, the username of the sender,
+ * and the arguments. If the username, command, or arguments are longer than a specified
+ * maximum width, they are truncated and an ellipsis ("...") is added.
+ * 
+ * @param username The username of the user who issued the command.
+ * @param cmd The command issued by the user.
+ * @param args The arguments passed along with the command.
+ */
+void Bot::displayCmdReceived(std::string username, std::string cmd, std::string args) {
+    const int max_width = 25;
+    std::string username_display = username;
+    std::string cmd_display = cmd;
+    std::string args_display = args;
+    
+    if (args.length() > max_width)
+        args_display = args.substr(0, max_width - 3) + "...";
+    if (username.length() > max_width)
+        username_display = username.substr(0, max_width - 3) + "...";
+    if (cmd.length() > max_width)
+        cmd_display = cmd.substr(0, max_width - 3) + "...";
 
+    std::cout << "╒";
+    for (int i = 0; i < (max_width - 10); ++i)
+        std::cout << "═";
+    std::cout << " Command received ";
+    for (int i = 0; i < (max_width - 10); ++i)
+        std::cout << "═";
+    std::cout << "╕" << std::endl;
+    std::cout << "| [Username]  => { " << std::setw(max_width) << std::left << username_display << " }   |" << std::endl;
+    std::cout << "| [Command]   => { " << std::setw(max_width) << std::left << cmd_display << " }   |" << std::endl;
+    std::cout << "| [Args]      => { " << std::setw(max_width) << std::left << args_display << " }   |" << std::endl;
+    std::cout << "╘";
+    for (int i = 0; i < max_width * 2 - 2; ++i)
+        std::cout << "═";
+    std::cout << "╛" << std::endl << std::endl;
+}
+
+/**
+ * @brief Applies a command issued by a user.
+ * 
+ * This function processes a command string issued by a user, extracts the command and its arguments,
+ * and invokes the corresponding command function if it exists. If the command is not found,
+ * it sends a message indicating that the command was not found.
+ * 
+ * @param command The full command string issued by the user.
+ * @param username The username of the user who issued the command.
+ */
 void Bot::apply_cmd(const std::string &command, const std::string &username) {
     std::string cmd = command;
 
     cmd = cmd.substr(0, cmd.size() - 2);
-    std::cout << "Command received: " << cmd << std::endl;
-    std::cout << "Username: " << username << std::endl;
     std::string args = getArgs(cmd);
     cmd = cmd.substr(0, cmd.find(" "));
-    std::cout << "Args: " << args << std::endl;
-    std::cout << "Command: " << cmd << std::endl;
     std::map<std::string, t_data_func>::iterator it = commands.find(cmd);
+
+    displayCmdReceived(username, cmd, args);
     if (it != commands.end()) {
         t_data_func command_data = it->second;
         CommandFunction func = command_data.func;
         sendMsg((this->*func)(username, args), username);
-    } else
+    } else {
         sendMsg("Command not found \nTry !help\n", username);
+    }
 }
+
 
 // ===================================================================================================
 // ========================================= Connection PART =========================================
@@ -309,11 +472,11 @@ void Bot::handleServerResponse() {
         if (std::string(buffer).find("464") != std::string::npos) {
             std::cerr << "Error: Password incorrect" << std::endl;
             disconnect();
-            return;
+            return ;
         } else if (std::string(buffer).find("001") != std::string::npos) {
             std::cout << "Successfully connected to the server" << std::endl;
             connected = true;
-            return;
+            return ;
         }
     }
     std::cerr << "Error: Unable to connect to the server" << std::endl;
@@ -367,10 +530,10 @@ bool Bot::waitForServerResponse() {
     while (true) {
         int poll_ret = poll(&pfd, 1, -1);
         if (poll_ret > 0) {
-            return true;
+            return (true);
         } else if (poll_ret < 0) {
             std::cerr << "Error: poll() failed" << std::endl;
-            return false;
+            return (false);
         }
     }
 }
@@ -385,7 +548,7 @@ bool Bot::waitForServerResponse() {
  * @return The number of bytes read, or -1 if an error occurs.
  */
 int Bot::readServerResponse(char *buffer, int size) {
-    return read(sockfd, buffer, size);
+    return (read(sockfd, buffer, size));
 }
 
 /**
@@ -399,11 +562,6 @@ int Bot::readServerResponse(char *buffer, int size) {
 void Bot::handleServerResponse(char *buffer, int size) {
     if (size > 0) {
         buffer[size] = '\0';
-        std::cout << "Server response received" << std::endl;
-        std::cout << "============ MSG Recus ============ " << std::endl;
-        std::cout << GREEN << buffer << RESET << std::endl;
-        std::cout << "===================================" << std::endl;
-
         std::string msg(buffer);
         std::string command;
         if (is_cmd(msg, command))
@@ -426,20 +584,38 @@ void Bot::handleServerResponse(char *buffer, int size) {
 
 // ============ Getters ============
 
-std::string Bot::getUser(const std::string &msg) {
+/**
+ * @brief Extracts the username from a given message.
+ * 
+ * This function searches for the first occurrence of the '!' character in the message
+ * and extracts the substring from the start of the message up to (but not including) the '!' character.
+ * 
+ * @param msg The input message from which the username is to be extracted.
+ * @return std::string The extracted username. Returns an empty string if '!' is not found.
+ */
+std::string Bot::getUser(const std::string &msg) const {
     size_t pos = msg.find("!");
     if (pos != std::string::npos) {
         return msg.substr(1, pos - 1);
     }
-    return "";
+    return ("");
 }
 
-std::string Bot::getArgs(const std::string &msg) {
+/**
+ * @brief Extracts the arguments from a given message.
+ * 
+ * This function searches for the first occurrence of the ' ' (space) character in the message
+ * and extracts the substring from the character immediately following the space to the end of the message.
+ * 
+ * @param msg The input message from which the arguments are to be extracted.
+ * @return std::string The extracted arguments. Returns an empty string if a space is not found.
+ */
+std::string Bot::getArgs(const std::string &msg) const {
     size_t pos = msg.find(" ");
     if (pos != std::string::npos) {
         return msg.substr(pos + 1);
     }
-    return "";
+    return ("");
 }
 
 // ============ Setters ============

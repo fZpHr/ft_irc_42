@@ -6,7 +6,7 @@
 /*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 19:38:12 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 16:58:18 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/11 21:23:09 by ben              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,21 +23,25 @@
 class TicTacToe
 {
 	public:
+		// ========== Constructors ========== //
 		TicTacToe();
 		TicTacToe(const TicTacToe &src);
-		~TicTacToe();
 		TicTacToe &operator=(const TicTacToe &rhs);
 
+		// ========== Destructor ========== //
+		~TicTacToe();
+
+		// ========== Member functions ========== //
 		std::string			play(std::string move, char player);
 		std::string			getBoard() const;
 		void				resetBoard();
 		
 	private:
-		// Data PART
+		// ========== Data PART ========== //
 		char board[3][3];
 		std::pair<int, int> findBestMove();
 
-		// Game PART
+		// ========== Game PART ========== //
 		bool 				makeMove(int row, int col, char player);
 		std::pair<int, int> getCorrMove(const std::string& move) const;
 		
@@ -51,7 +55,7 @@ class TicTacToe
 		std::string 		handleAIMove(char player);
 		std::string 		convertToString(int num) const;
 
-		// IA PART
+		// ========== IA PART ========== //
 		int 				evaluate(char board[3][3]) const;
 		int 				evaluateLines(char board[3][3]) const;
 		int 				evaluateColumns(char board[3][3]) const;
