@@ -6,7 +6,7 @@
 /*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 19:46:28 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 16:58:24 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/11 20:52:55 by ben              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,7 +208,7 @@ std::string TicTacToe::play(std::string move, char player) {
     std::pair<int, int> move_int;
     
     if (!isValideMove(move))
-        return ("===== Invalide format move =====\n" + getBoard());
+        return ("===== Invalide format move =====\n" + getBoard() + "\r\n");
     
     move_int = getCorrMove(move);
     int row = move_int.first;

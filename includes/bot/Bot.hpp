@@ -6,7 +6,7 @@
 /*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:26:46 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 14:25:24 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/11 20:56:05 by ben              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 # include <exception>
 # include <algorithm>
 # include <poll.h>
+
+# include "TicTacToe.hpp"
 
 # define PURPLE "\033[35m"
 # define RED    "\033[31m"
@@ -47,11 +49,30 @@ class Bot
 
 
 	private:
+		// Connection variables
 		int sockfd;
         bool connected;
         std::string address;
         std::string port;
         std::string password;
+		
+		// Typedef for command functions
+		typedef std::string (Bot::*CommandFunction)(const std::string&, const std::string&);
+
+		typedef struct s_data_func
+		{
+			std::string description;
+			CommandFunction func;
+		}				t_data_func;
+
+		// Map of commands
+		std::map<std::string, t_data_func> commands;
+		
+		// Map of players tic tac toe
+		std::map<std::string, TicTacToe> games;
+
+		void addCommand(const std::string &command, const std::string &description, CommandFunction func);
+		void sendMsg(std::string msg, const std::string &username);
 
 		// Connection functions
 		void createSocket();
@@ -66,15 +87,25 @@ class Bot
 		int readServerResponse(char *buffer, int size);
 		void handleServerResponse(char *buffer, int size);
 
-		typedef std::string (Bot::*CommandFunction)();
-		std::map<std::string, CommandFunction> commands;
 
 		void initCommands();
 
 		bool is_cmd(const std::string &msg, std::string &command);
-		void apply_cmd(const std::string &command);
+		void apply_cmd(const std::string &command, const std::string &username);
 
-		std::string help();
+		std::string getUser(const std::string &msg);
+		std::string getArgs(const std::string &msg);
+
+		std::string tictactoe(const std::string &username, const std::string &args);
+		std::string play(const std::string &username, const std::string &args);
+		std::string restart(const std::string &username, const std::string &args);
+
+		std::string help(const std::string &username, const std::string &args);
+		std::string help_list(const std::string &username, const std::string &args);
+		std::string help_tictactoe(const std::string &username, const std::string &args);
+		std::string help_play(const std::string &username, const std::string &args);
+		std::string help_restart(const std::string &username, const std::string &args);
+
 };
 
 #endif

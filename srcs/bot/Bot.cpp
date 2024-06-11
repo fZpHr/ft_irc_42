@@ -6,11 +6,15 @@
 /*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:28:02 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 14:25:19 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/11 20:56:59 by ben              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Bot.hpp"
+
+// ===================================================================================================
+// ======================================== Utils Class PART =========================================
+// ===================================================================================================
 
 // ============ Constructor ============
 
@@ -45,15 +49,105 @@ Bot &Bot::operator=(const Bot &rhs) {
     return (*this);
 }
 
-// ============ Member Functions ============
+// ===================================================================================================
+// ========================================== Commands PART ==========================================
+// ===================================================================================================
+
+std::string Bot::tictactoe(const std::string &username, const std::string &args) {
+    if (games.find(username) == games.end()) {
+        games[username] = TicTacToe();
+        return ("===== Game started =====\r\n" + games[username].getBoard() + "\r\n" + "\tMake your move {!play row-col}\r\n");
+    }
+    return "===== Game already started =====\r\n\tMake your move {!play row-col}\r\n";
+}
+
+std::string Bot::play(const std::string &username, const std::string &args) {
+    std::cout << "Args: [" << args << "]" << std::endl;
+    if (games.find(username) != games.end()) {
+        std::string response = games[username].play(args, 'X');
+        return response;
+    }
+    return "===== No game started, type !tictactoe to start a game ===== \r\n";
+}
+
+std::string Bot::restart(const std::string &username, const std::string &args) {
+    if (games.find(username) != games.end()) {
+        games[username].resetBoard();
+        return ("===== Game restarted =====\r\n" + games[username].getBoard() + "\r\n" + "\tMake your move {!play row-col}\r\n");
+    }
+    return "===== No game started, type !tictactoe to start a game =====\r\n";
+}
+
+// ===================================================================================================
+// ======================================== Help Commands PART =======================================
+// ===================================================================================================
+
+std::string Bot::help(const std::string &username, const std::string &args) {
+
+    if (args.empty())
+        return help_list(username, args);
+    if (args == "tictactoe")
+        return help_tictactoe(username, args);
+    if (args == "play")
+        return help_play(username, args);
+    if (args == "restart")
+        return help_restart(username, args);
+    else
+        return "No information for this cmd [" + args + "]\n";
+}
+
+std::string Bot::help_list(const std::string &username, const std::string &args) {
+    std::string response = "\n================ Cmd list ================\r\n";
+    for (std::map<std::string, t_data_func>::iterator it = commands.begin(); it != commands.end(); ++it) {
+        response += "\t[" + it->first + "] => {" + it->second.description + "}\r\n";
+    }
+    response += "==========================================\r\n";
+    response += "For more information about a command, type !help <command>\r\n";
+    response += "==========================================\r\n";
+    return (response);
+}
+
+std::string Bot::help_tictactoe(const std::string &username, const std::string &args) {
+    std::string response = "=================== Help TicTacToe ===================\r\n";
+    response += "\tThe game is played on a 3x3 grid.\r\n";
+    response += "\tYou are X, IA is O. Players take turns putting their marks in empty squares.\r\n";
+    response += "\tThe first player to get 3 of her marks in a row (up, down, across, or diagonally) is the winner.\r\n";
+    response += "\tWhen all 9 squares are full, the game is over. If no player has 3 marks in a row, the game ends in a tie.\r\n";
+    response += "\tTo make a move, type !play row-col (e.g. !play 1-1)\r\n";
+    response += "\tTo restart the game, type !restart\r\n";
+    return response;
+}
+
+std::string Bot::help_play(const std::string &username, const std::string &args) {
+    std::string response = "=================== Help Play ===================\r\n";
+    response += "\tTo make a move, type !play row-col (e.g. !play 1-1)\r\n";
+    return response;
+}
+
+std::string Bot::help_restart(const std::string &username, const std::string &args) {
+    std::string response = "=================== Help Restart ===================\r\n";
+    response += "\tTo restart the game, type !restart\r\n";
+    return response;
+}
+
+// ===================================================================================================
+// ======================================= Utils Commands PART =======================================
+// ===================================================================================================
+
+void Bot::addCommand(const std::string& command_name, const std::string& description, CommandFunction func) {
+    t_data_func command_data;
+    command_data.description = description;
+    command_data.func = func;
+    commands[command_name] = command_data;
+}
 
 void Bot::initCommands() {
-    commands["!help"] = &Bot::help;
+    addCommand("!tictactoe", "Play at TicTacToe with a IA.", &Bot::tictactoe);
+    addCommand("!play", "Make a move at TicTacToe", &Bot::play);
+    addCommand("!restart", "Restart the game.", &Bot::restart);
+    addCommand("!help", "Display all available commands.", &Bot::help);
 }
 
-std::string Bot::help() {
-    return "Available commands: !help";
-}
 
 bool Bot::is_cmd(const std::string &msg, std::string &command) {
     size_t pos = msg.find("PRIVMSG");
@@ -67,31 +161,40 @@ bool Bot::is_cmd(const std::string &msg, std::string &command) {
     return false;
 }
 
-void Bot::apply_cmd(const std::string &command) {
-	std::string cmd = command;
-    std::cout << "cmd list \n";
+void Bot::sendMsg(std::string msg, const std::string &username) {
+    std::vector<std::string> messages;
 
-    for (std::map<std::string, CommandFunction>::iterator it = commands.begin(); it != commands.end(); ++it) {
-        std::cout << "[" << it->first << "]" << std::endl;
+    size_t pos = 0;
+    while ((pos = msg.find("\n")) != std::string::npos) {
+        messages.push_back(msg.substr(0, pos));
+        msg.erase(0, pos + 1);
     }
+    messages.push_back(msg);
 
-    std::cout << "cmd received : [" << cmd << "]" << std::endl;
+    for (size_t i = 0; i < messages.size() - 1; ++i) {
+        std::string reply = "PRIVMSG " + std::string(username) + " :" + messages[i] + "\r\n";
+        send(sockfd, reply.c_str(), reply.length(), 0);
+    }
+}
 
-	cmd.erase(std::remove(cmd.begin(), cmd.end(), '\r'), cmd.end());
 
-    std::cout << "clean cmd received : [" << cmd << "]" << std::endl;
+void Bot::apply_cmd(const std::string &command, const std::string &username) {
+    std::string cmd = command;
 
-    std::map<std::string, CommandFunction>::iterator it = commands.find(cmd);
+    cmd = cmd.substr(0, cmd.size() - 2);
+    std::cout << "Command received: " << cmd << std::endl;
+    std::cout << "Username: " << username << std::endl;
+    std::string args = getArgs(cmd);
+    cmd = cmd.substr(0, cmd.find(" "));
+    std::cout << "Args: " << args << std::endl;
+    std::cout << "Command: " << cmd << std::endl;
+    std::map<std::string, t_data_func>::iterator it = commands.find(cmd);
     if (it != commands.end()) {
-        CommandFunction func = it->second;
-        std::string response = (this->*func)();
-        std::string reply = "PRIVMSG " + std::string("bberkrou") + " :" + response + "\r\n";
-        std::cout << "DEBUG : " << reply << "\n";
-        send(sockfd, reply.c_str(), reply.length(), 0);
-    } else {
-        std::string reply = "PRIVMSG " + std::string("bberkrou") + " :Command not found\r\n";
-        send(sockfd, reply.c_str(), reply.length(), 0);
-    }
+        t_data_func command_data = it->second;
+        CommandFunction func = command_data.func;
+        sendMsg((this->*func)(username, args), username);
+    } else
+        sendMsg("Command not found \nTry !help\n", username);
 }
 
 // ===================================================================================================
@@ -262,15 +365,13 @@ bool Bot::waitForServerResponse() {
     pfd.events = POLLIN;
 
     while (true) {
-        int poll_ret = poll(&pfd, 1, -1); // Attente indéfinie jusqu'à ce que des données soient disponibles
+        int poll_ret = poll(&pfd, 1, -1);
         if (poll_ret > 0) {
-            return true; // Des données sont disponibles à lire
+            return true;
         } else if (poll_ret < 0) {
-            // Erreur de poll, gérer l'erreur ici si nécessaire
             std::cerr << "Error: poll() failed" << std::endl;
             return false;
         }
-        // Aucune donnée disponible, continuer à attendre
     }
 }
 
@@ -305,12 +406,10 @@ void Bot::handleServerResponse(char *buffer, int size) {
 
         std::string msg(buffer);
         std::string command;
-        if (is_cmd(msg, command)) {
-            std::cout << "Command received: " << command << std::endl;
-            apply_cmd(command);
-        } else {
+        if (is_cmd(msg, command))
+            apply_cmd(command, getUser(msg));
+        else
             std::cout << "No command received" << std::endl;
-        }
     } else if (size == 0) {
         std::cerr << "Server disconnected" << std::endl;
         disconnect();
@@ -320,8 +419,27 @@ void Bot::handleServerResponse(char *buffer, int size) {
     }
 }
 
+// ===================================================================================================
+// =========================================== Utils PART ============================================
+// ===================================================================================================
 
 
 // ============ Getters ============
+
+std::string Bot::getUser(const std::string &msg) {
+    size_t pos = msg.find("!");
+    if (pos != std::string::npos) {
+        return msg.substr(1, pos - 1);
+    }
+    return "";
+}
+
+std::string Bot::getArgs(const std::string &msg) {
+    size_t pos = msg.find(" ");
+    if (pos != std::string::npos) {
+        return msg.substr(pos + 1);
+    }
+    return "";
+}
 
 // ============ Setters ============
