@@ -4,7 +4,6 @@ Channel::Channel()
 {
 	_id = 0;
 	_topic = "";
-	_is_private = false;
 	_user_limit = 0;
 	_passwd = "";
 	_has_passwd = false;
@@ -13,18 +12,6 @@ Channel::Channel()
 	_limit_user_mod = false;
 }
 
-Channel::Channel(bool pv){
-	_id = 0;
-	_topic = "";
-	_is_private = pv;
-	_user_limit = 0;
-	_passwd = "";
-	_has_passwd = false;
-	_invite_only = false;
-	_topic_mod = false;
-	_limit_user_mod = false;
-
-}
 Channel::~Channel()
 {
 }
@@ -59,6 +46,39 @@ std::vector<Client *>	Channel::getUserList(void)
 	return _userList;
 }
 
+std::vector<Client *>	Channel::getUserMod(void)
+{
+	return _mod;
+}
+
+void					Channel::addUserMod(Client *target)
+{
+	_mod.push_back(target);
+}
+
+void			Channel::removeClient(Client *client)
+{
+	for (std::vector<Client *>::iterator itr = _userList.begin(); itr != _userList.end(); ++itr)
+	{
+		if ((*itr)->getUser() == client->getUser())
+		{
+			_userList.erase(itr);
+			return ;
+		}
+	}
+}
+
+void			Channel::removeUserMod(Client *client)
+{
+	for (std::vector<Client *>::iterator itr = _mod.begin(); itr != _mod.end(); ++itr)
+	{
+		if ((*itr)->getUser() == client->getUser())
+		{
+			_mod.erase(itr);
+			return ;
+		}
+	}
+}
 
 std::string				Channel::getNicks(void)
 {

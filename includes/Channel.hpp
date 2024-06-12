@@ -19,7 +19,6 @@ class Channel
 {
 	public:
 		Channel();
-		Channel(bool pv);
 		~Channel();
 
 		void			setName(std::string name);
@@ -27,7 +26,11 @@ class Channel
 		std::string		getName();
 		std::string		getTopic();
 		void			addClient(Client *client);
+		void			removeClient(Client *client);
 		std::vector<Client *>	getUserList(void);
+		std::vector<Client *>	getUserMod(void);
+		void					addUserMod(Client *target);
+		void					removeUserMod(Client *target);
 		std::string				getNicks(void);
 		// void				setUserLimit(int limit);
 		// void				setPrivate(bool is_private);
@@ -51,9 +54,9 @@ class Channel
 		Channel &operator=(Channel const &rhs);
 		std::string			_name;
 		std::vector<Client *> _userList;
+		std::vector<Client *> _mod;
 		int					_id;
 		std::string			_topic;
-		bool				_is_private;
 		int					_user_limit;
 		std::string			_passwd;
 		bool				_has_passwd;
