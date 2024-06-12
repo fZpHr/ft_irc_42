@@ -56,6 +56,29 @@ void					Channel::addUserMod(Client *target)
 	_mod.push_back(target);
 }
 
+void			Channel::removeClient(Client *client)
+{
+	for (std::vector<Client *>::iterator itr = _userList.begin(); itr != _userList.end(); ++itr)
+	{
+		if ((*itr)->getUser() == client->getUser())
+		{
+			_userList.erase(itr);
+			return ;
+		}
+	}
+}
+
+void			Channel::removeUserMod(Client *client)
+{
+	for (std::vector<Client *>::iterator itr = _mod.begin(); itr != _mod.end(); ++itr)
+	{
+		if ((*itr)->getUser() == client->getUser())
+		{
+			_mod.erase(itr);
+			return ;
+		}
+	}
+}
 
 std::string				Channel::getNicks(void)
 {

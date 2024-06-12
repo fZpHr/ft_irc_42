@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/11 16:22:33 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/12 17:27:24 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -324,15 +324,55 @@ int Client::leaveChan(std::string target)
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
 		return 1;
 	}
-	(void)target;
+	std::string channel;
+	for (size_t i = 0; i < target.length(); i++)
+	{
+		if (target[i] == '#')
+		{
+			channel = target.substr(i, target.length());
+			break ;
+		}
+	}
+	for (size_t i = 0; i < channel.length(); i++)
+	{
+		if (channel[i] == ' ')
+		{
+			channel = channel.substr(0, i);
+			break ;
+		}
+	}
+	for (size_t i = 0; i < _server->getChannels().size(); i++)
+	{
+		if (_server->getChannels()[i]->getName() == channel)
+		{
+			std::vector<Client *> lst = _server->getChannels()[i]->getUserList();
+			for (size_t j = 0; j != lst.size(); j++)
+			{
+				std::string msg = ":";
+				msg += _nickname;
+				msg += "!";
+				msg += _username;
+				msg += "@127.0.0.1 PART ";
+				msg += channel;
+				msg += " :Leaving";
+				msg += "\r\n";
+				send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
+			}
+			_server->getChannels()[i]->removeClient(this);
+			_server->getChannels()[i]->removeUserMod(this);
+		}
+	}
 	return 0;
 }
 
 int Client::kickChan(std::string target, std::string channel, std::string reason)
 {
-	(void)target;
-	(void)channel;
-	(void)reason;
+	if (_username.empty() || _nickname.empty() || _password == false)
+	{
+		sendMsg(ERR_NOTREGISTERED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
+		return 1;
+	}
 	return 0;
 }
 
