@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   TicTacToe.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 19:46:28 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 20:52:55 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/12 21:58:16 by bberkrou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "TicTacToe.hpp"
+#include "../includes/bot/TicTacToe.hpp"
 
 // ===================================================================================================
 // ======================================== Utils Class PART =========================================
@@ -227,7 +227,7 @@ std::string TicTacToe::play(std::string move, char player) {
         else if (isNull())
             state += "===== Match NULL =====\n";
         else
-            state += handleAIMove(player);
+            state += handleAIMove();
     } else
         state += "===== Invalid move! try again. =====\n";
     state += getBoard() + '\n';
@@ -254,7 +254,7 @@ std::string TicTacToe::handlePlayerWin(char player) const {
  * @param player The character representing the player who made the initial move.
  * @return A string representing the state of the game after the AI's move.
  */
-std::string TicTacToe::handleAIMove(char player) {
+std::string TicTacToe::handleAIMove( void ) {
     std::string state = "";
     std::pair<int, int> bestMove = findBestMove();
     int move_x = bestMove.first;
@@ -495,21 +495,24 @@ std::pair<int, int> TicTacToe::findBestMove() {
 
 std::string TicTacToe::getBoard() const {
     std::string board_str = "";
-	board_str += "    0   1   2\n";
-	board_str += "  ╒═══╤═══╤═══╕\n";
+    board_str += "    0   1   2\n";
+    board_str += "  ╒═══╤═══╤═══╕\n";
+    
     for (int i = 0; i < 3; i++) {
-		board_str += std::to_string(i) + " │";
+        std::stringstream ss;
+        ss << i;
+        board_str += ss.str() + " │";
         for (int j = 0; j < 3; j++) {
-			board_str += " ";
+            board_str += " ";
             board_str += board[i][j];
-			board_str += " │";
+            board_str += " │";
         }
-		board_str += "\n";
-		if (i < 2)
-			board_str += "  ├———┼———┼———┤\n";
+        board_str += "\n";
+        if (i < 2)
+            board_str += "  ├———┼———┼———┤\n";
     }
-	board_str += "  ╘═══╧═══╧═══╛";
-    return (board_str);
+    board_str += "  ╘═══╧═══╧═══╛";
+    return board_str;
 }
 
 /**
@@ -527,8 +530,7 @@ std::pair<int, int> TicTacToe::getCorrMove(const std::string& move) const {
     std::stringstream ss(move);
     
     ss >> row >> dash >> col;
-    return {row, col};
+    return std::make_pair(row, col);  // Utilisez std::make_pair pour C++98
 }
-
 
 // ============ Setters ============

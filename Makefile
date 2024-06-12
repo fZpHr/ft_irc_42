@@ -19,8 +19,13 @@ SRCS	=	srcs/main.cpp \
 			srcs/Channel.cpp \
 			srcs/utils/utils.cpp
 
+SRCS_BOT = srcs/bot/main_bot.cpp \
+			srcs/bot/Bot.cpp \
+			srcs/bot/TicTacToe.cpp
+
 OBJ_DIR = .o
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:%.cpp=%.o))
+OBJS_BOT = $(addprefix $(OBJ_DIR)/, $(SRCS_BOT:%.cpp=%.o))
 
 RM	=	rm -f
 HEADER =	-I includes
@@ -43,9 +48,17 @@ $(NAME): $(OBJS)
 	@c++ -o $(NAME) $(OBJS) $(CXXFLAGS) $(HEADER)
 	@echo "\033[01m\033[4;33mCompilation done\033[00m\033[1;31m =▶\033[00m\033[1;32m ./${NAME}\033[00m"
 
+bot : $(OBJS_BOT)
+	@c++ -o bot $(OBJS_BOT) $(CXXFLAGS) $(HEADER)
+	@echo "\033[01m\033[4;33mCompilation done\033[00m\033[1;31m =▶\033[00m\033[1;32m ./bot\033[00m"
+
 all:	${NAME}
 
 clean:
+	@${RM} -r $(OBJ_DIR) 
+	@echo "\033[01m\033[31mRemoving objects ...\033[00m"
+
+clean_bot:
 	@${RM} -r $(OBJ_DIR) 
 	@echo "\033[01m\033[31mRemoving objects ...\033[00m"
 
@@ -53,7 +66,13 @@ fclean:	clean
 	@${RM} ${NAME}
 	@echo "\033[01m\033[31mRemoving exec : ${NAME} ...\033[00m"
 
+fclean_bot:	clean_bot
+	@${RM} bot
+	@echo "\033[01m\033[31mRemoving exec : bot ...\033[00m"
+
 re:	fclean all
+
+re_bot:	fclean_bot bot
 
 debug: fclean
 debug: STD = -std=c++11

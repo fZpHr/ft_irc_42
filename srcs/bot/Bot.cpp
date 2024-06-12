@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Bot.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:28:02 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 22:13:11 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/12 21:54:53 by bberkrou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Bot.hpp"
+#include "../includes/bot/Bot.hpp"
 
 // ===================================================================================================
 // ======================================== Utils Class PART =========================================
@@ -64,6 +64,7 @@ Bot &Bot::operator=(const Bot &rhs) {
  * @return A string containing the game board or an appropriate message.
  */
 std::string Bot::tictactoe(const std::string &username, const std::string &args) {
+    (void)args;
     if (games.find(username) == games.end()) {
         games[username] = TicTacToe();
         return ("===== Game started =====\r\n" + games[username].getBoard() + "\r\n" + "\tMake your move {!play row-col}\r\n");
@@ -100,6 +101,7 @@ std::string Bot::play(const std::string &username, const std::string &args) {
  * @return A string containing the new game board or an appropriate message.
  */
 std::string Bot::restart(const std::string &username, const std::string &args) {
+    (void)args;
     if (games.find(username) != games.end()) {
         games[username].resetBoard();
         return ("===== Game restarted =====\r\n" + games[username].getBoard() + "\r\n" + "\tMake your move {!play row-col}\r\n");
@@ -147,6 +149,8 @@ std::string Bot::help(const std::string &username, const std::string &args) {
  * @return A string containing the list of commands.
  */
 std::string Bot::help_list(const std::string &username, const std::string &args) {
+    (void)args;
+    (void)username;
     std::string answer = "\n================ Cmd list ================\r\n";
     for (std::map<std::string, t_data_func>::iterator it = commands.begin(); it != commands.end(); ++it) {
         answer += "\t[" + it->first + "] => {" + it->second.description + "}\r\n";
@@ -168,6 +172,8 @@ std::string Bot::help_list(const std::string &username, const std::string &args)
  * @return A string containing the help information for the !tictactoe command.
  */
 std::string Bot::help_tictactoe(const std::string &username, const std::string &args) {
+    (void)args;
+    (void)username;
     std::string answer = "=================== Help TicTacToe ===================\r\n";
     answer += "\tThe game is played on a 3x3 grid.\r\n";
     answer += "\tYou are X, IA is O. Players take turns putting their marks in empty squares.\r\n";
@@ -188,6 +194,8 @@ std::string Bot::help_tictactoe(const std::string &username, const std::string &
  * @return A string containing the help information for the !play command.
  */
 std::string Bot::help_play(const std::string &username, const std::string &args) {
+    (void)args;
+    (void)username;
     std::string answer = "=================== Help Play ===================\r\n";
     answer += "\tTo make a move, type !play row-col (e.g. !play 1-1)\r\n";
     return (answer);
@@ -203,6 +211,8 @@ std::string Bot::help_play(const std::string &username, const std::string &args)
  * @return A string containing the help information for the !restart command.
  */
 std::string Bot::help_restart(const std::string &username, const std::string &args) {
+    (void)username;
+    (void)args;
     std::string answer = "=================== Help Restart ===================\r\n";
     answer += "\tTo restart the game, type !restart\r\n";
     return (answer);
@@ -416,10 +426,17 @@ void Bot::createSocket() {
  */
 void Bot::setupAddressStruct(const std::string &address, const std::string &port, struct sockaddr_in &serv_addr) {
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(std::stoi(port));
 
-    if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0)
+    std::stringstream ss(port);
+    int portNumber;
+    if (!(ss >> portNumber)) {
+        throw std::runtime_error("Invalid port number");
+    }
+    serv_addr.sin_port = htons(portNumber);
+
+    if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0) {
         throw std::runtime_error("Invalid address/ Address not supported");
+    }
 }
 
 /**

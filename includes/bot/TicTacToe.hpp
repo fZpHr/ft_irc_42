@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   TicTacToe.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 19:38:12 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 21:23:09 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/12 21:57:05 by bberkrou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@
 # include <string>
 # include <algorithm>
 # include <limits.h>
-#include <sstream>
-
+# include <sstream>
+# include <utility>
 
 class TicTacToe
 {
@@ -52,7 +52,7 @@ class TicTacToe
 		bool 				checkWinDiagonals(char player) const;
 		
 		std::string 		handlePlayerWin(char player) const;
-		std::string 		handleAIMove(char player);
+		std::string 		handleAIMove();
 		std::string 		convertToString(int num) const;
 
 		// ========== IA PART ========== //

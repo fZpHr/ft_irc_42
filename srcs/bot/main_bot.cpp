@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   main_bot.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:27:56 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 17:00:11 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/12 21:48:37 by bberkrou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Bot.hpp"
-#include "TicTacToe.hpp"
+#include "../includes/bot/TicTacToe.hpp"
+#include "../includes/bot/Bot.hpp"
 
 int main(int argc, char **argv)
 {
