@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:28:02 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/13 01:55:48 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/13 01:57:56 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,8 @@ std::string Bot::help(const std::string &username, const std::string &args) {
  * @return A string containing the list of commands.
  */
 std::string Bot::help_list(const std::string &username, const std::string &args) {
+    (void)username;
+    (void)args;
     std::string answer = "\n================ Cmd list ================\r\n";
     for (std::map<std::string, t_data_func>::iterator it = commands.begin(); it != commands.end(); ++it) {
         answer += "\t[" + it->first + "] => {" + it->second.description + "}\r\n";
