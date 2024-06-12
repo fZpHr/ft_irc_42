@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Bot.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ben <ben@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: bberkrou <bberkrou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:26:46 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/11 22:10:22 by ben              ###   ########.fr       */
+/*   Updated: 2024/06/12 21:53:28 by bberkrou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@
 # include <algorithm>
 # include <poll.h>
 # include <iomanip>
+# include <vector>
+# include <string>
+# include <cstdlib>
 
 # include "TicTacToe.hpp"
 
