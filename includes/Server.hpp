@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/10 17:47:51 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/12 18:04:30 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ class Server
 
 		void freeClients();
 
+		void pingClients();
+		
 
 		//DEBUG PURPOSE
 		void printState();

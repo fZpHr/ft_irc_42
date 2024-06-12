@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/12 17:27:24 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/12 18:28:47 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,10 @@ Client &Client::operator=(Client const &rhs)
 	return (*this);
 }
 
-//##############################################################################################################
-//##############################################################################################################
-//##############################################################################################################
-//############################################COMMANDS CLIENT PART##############################################
-//##############################################################################################################
-//##############################################################################################################
-//##############################################################################################################
+
+// ===================================================================================================
+// ======================================COMMANDInput error: No such nS CLIENT PART=========================================
+// ===================================================================================================
 
 int	Client::setUser(std::string name)
 {
@@ -73,13 +70,19 @@ int	Client::setUser(std::string name)
 	iss >> hostname;
 	iss >> servername;
 	std::getline(iss, realname);
-	realname = realname.substr(1);
 	if (_registered)
 	{
 		sendMsg(ERR_ALREADYREGISTRED(argument));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Can't change credential after being registered" << RESET << std::endl;
 		return 1;
 	}
+	if (realname.empty())
+	{
+		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Not enough parameters" << RESET << std::endl;
+		return 1;
+	}
+	realname = realname.substr(1);
 	if (realname.empty() || realname[0] != ':')
 	{
 		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
@@ -104,11 +107,18 @@ int  Client::setNick(std::string nick)
 	std::string error;
 	iss >> word;
 	getline(iss, argument);
-	argument = argument.substr(1);
 	regex_t regex;
 	int ret;
+	if (argument.empty())
+	{
+		sendMsg(ERR_NONICKNAMEGIVEN(word));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No nickname given" << RESET << std::endl;
+		return 1;
+	}
+	argument = argument.substr(1);
 	ret = regcomp(&regex, REGEXNICKNAME, REG_EXTENDED);
-	if (ret) {
+	if (ret)
+	{
 		char msgbuf[100];
 		regerror(ret, &regex, msgbuf, sizeof(msgbuf));
 		std::cerr << BLACK << getCurrentTime() << "    " << "Regex error: " << msgbuf << std::endl;
@@ -128,12 +138,6 @@ int  Client::setNick(std::string nick)
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Too many arguments" << RESET << std::endl;
 		return 1;
 	}
-	if (argument.empty())
-	{
-		sendMsg(ERR_NONICKNAMEGIVEN(word));
-		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No nickname given" << RESET << std::endl;
-		return 1;
-	}
 	if (_server->clientExistString(argument) != -1 && getNick() != argument)
 	{
 		sendMsg(ERR_NICKNAMEINUSE(argument));
@@ -143,7 +147,6 @@ int  Client::setNick(std::string nick)
 	_nickname = argument;
 	return 0;
 }
-
 
 int	Client::prvMsg(std::string input)
 {
@@ -160,7 +163,6 @@ int	Client::prvMsg(std::string input)
 	iss >> cmd;
 	iss >> target;
 	std::getline(iss, msg);
-	msg = msg.substr(1);
 	if ( msg.empty() || target.empty())
 	{
 		if (msg.empty())
@@ -175,6 +177,7 @@ int	Client::prvMsg(std::string input)
 		}
 		return 1;
 	}
+	msg = msg.substr(1);
 	int clientIndex = _server->clientExistString(target);
 	if (target.substr(0, 1) == "#")
 	{
@@ -184,7 +187,6 @@ int	Client::prvMsg(std::string input)
 			{
 				for (size_t j = 0; j < _server->getChannels()[i]->getUserList().size(); j++)
 				{
-					std::cout << _server->getChannels()[i]->getUserList()[j]->getNick() << std::endl;
 					if (_server->getChannels()[i]->getUserList()[j]->getNick() != _nickname)
 					{
 						std::string realsend;
@@ -245,6 +247,12 @@ int	Client::joinChan(std::string target)
 	{
 		sendMsg(ERR_NEEDMOREPARAMS(word, word));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Not enough parameters" << RESET << std::endl;
+		return 1;
+	}
+	if (argument[0] != '#')
+	{
+		sendMsg(ERR_NOSUCHCHANNEL(word, argument));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No such channel" << RESET << std::endl;
 		return 1;
 	}
 	if (_server->channelExist(argument))
@@ -367,6 +375,9 @@ int Client::leaveChan(std::string target)
 
 int Client::kickChan(std::string target, std::string channel, std::string reason)
 {
+	(void)target;
+	(void)channel;
+	(void)reason;
 	if (_username.empty() || _nickname.empty() || _password == false)
 	{
 		sendMsg(ERR_NOTREGISTERED(_nickname));
@@ -383,6 +394,12 @@ int	Client::setPassword(std::string command)
 	std::string pass;
 	iss >> cmd;
 	getline(iss, pass);
+	if (pass.empty())
+	{
+		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Not enough parameters" << RESET << std::endl;
+		return 1;
+	}
 	pass = pass.substr(1);
 	if (_registered == true)
 	{
@@ -403,14 +420,9 @@ int	Client::setPassword(std::string command)
 	}
 }
 
-//##############################################################################################################
-//##############################################################################################################
-//##############################################################################################################
-//############################################UTILS CLIENT PART#################################################
-//##############################################################################################################
-//##############################################################################################################
-//##############################################################################################################
-
+// ==============================================================================================
+// ======================================UTILS CLIENT PART=======================================
+// ==============================================================================================
 
 int	Client::setPerms()
 {
