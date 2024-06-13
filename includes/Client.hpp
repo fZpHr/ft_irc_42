@@ -35,8 +35,9 @@ class Client
 		bool			getPerms();
 		int				prvMsg(std::string input);
 		int				joinChan(std::string target);
-		int 			kickChan(std::string target, std::string channel, std::string reason);
+		int 			kickChan(std::string args);
 		int				leaveChan(std::string target);
+		int				inviteChan(std::string target);
 
 		int				setPassword(std::string command);
 		bool			getPassword();

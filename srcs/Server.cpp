@@ -220,10 +220,10 @@ int	Server::processCommand(std::string command, int fd)
 	std::string cmd;
 	iss >> cmd;
 	int clientIndex = clientExistFd(fd);
-	const std::string commands[6] = { "USER", "NICK" , "PRIVMSG" , "JOIN", "PASS", "PART"};
-	int (Client::*functions[6])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan, &Client::setPassword, &Client::leaveChan};
+	const std::string commands[8] = { "USER", "NICK" , "PRIVMSG" , "JOIN", "PASS", "PART", "KICK", "INVITE"};
+	int (Client::*functions[8])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan, &Client::setPassword, &Client::leaveChan, &Client::kickChan, &Client::inviteChan};
 
-	for (int i = 0; i < 6; i++) 
+	for (int i = 0; i < 7; i++) 
 	{
 		if (cmd == commands[i])
 		{
@@ -242,10 +242,7 @@ int	Server::processCommand(std::string command, int fd)
 			close(fd);
 			delete _clients[clientIndex];
 			return 2;
-		}// else if (cmd == "KICK")
-		// {
-		// 	_clients[clientIndex]->kickChan();
-		// }
+		}
 	}
 	return 0;
 }

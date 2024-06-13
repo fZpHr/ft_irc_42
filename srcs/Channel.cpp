@@ -93,6 +93,27 @@ std::string				Channel::getNicks(void)
 	return (list);
 }
 
+
+bool					Channel::is_user_mod(Client *target)
+{
+	for (std::vector<Client *>::iterator itr = _mod.begin(); itr != _mod.end(); ++itr)
+	{
+		if ((*itr)->getNick() == target->getNick())
+			return (true);
+	}
+	return (false);
+}
+
+bool					Channel::is_user(std::string nick)
+{
+	for (std::vector<Client *>::iterator itr = _userList.begin(); itr != _userList.end(); ++itr)
+	{
+		if ((*itr)->getNick() == nick)
+			return (true);
+	}
+	return (false);
+}
+
 // std::vector<Client>	Channel::getUserList(void){
 // 	return _user_list;
 // }

@@ -373,20 +373,101 @@ int Client::leaveChan(std::string target)
 	return 0;
 }
 
-int Client::kickChan(std::string target, std::string channel, std::string reason)
+int Client::kickChan(std::string args)
 {
-	(void)target;
-	(void)channel;
-	(void)reason;
+	std::string channel;
+	std::string target;
+	std::string reason;
 	if (_username.empty() || _nickname.empty() || _password == false)
 	{
 		sendMsg(ERR_NOTREGISTERED(_nickname));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
 		return 1;
 	}
+	for (size_t i = 0; i < args.length(); i++)
+	{
+		if (args[i] == '#')
+		{
+			channel = args.substr(i, args.length());
+			break ;
+		}
+	}
+	for (size_t i = 0; i < channel.length(); i++)
+	{
+		if (channel[i] == ' ')
+		{
+			target = channel.substr(i + 1, channel.length());
+			channel = channel.substr(0, i);
+			break ;
+		}
+	}
+	for (size_t i = 0; i < target.length(); i++)
+	{
+		if (target[i] == ':')
+		{
+			reason = target.substr(i + 1, target.length());
+			target = target.substr(0, i - 1);
+			break ;
+		}
+	}
+	for (size_t i = 0; i < _server->getChannels().size(); i++)
+	{
+		if (_server->getChannels()[i]->getName() == channel)
+		{
+			if (_server->getChannels()[i]->is_user(target) == false)
+			{
+				sendMsg(ERR_USERNOTINCHANNEL(_nickname, target, channel));
+				return 1;
+			}
+			if (_server->getChannels()[i]->is_user_mod(this) == false)
+			{
+				std::string msg = ":";
+				msg += "localhost 482 ";
+				msg += _username;
+				msg += " ";
+				msg += channel;
+				msg += " :You are'nt channel operator";
+				msg += "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			} else {
+				std::vector<Client *> lst = _server->getChannels()[i]->getUserList();
+				for (size_t j = 0; j != lst.size(); j++)
+				{
+					std::string msg = ":";
+					msg += _nickname;
+					msg += "!";
+					msg += _username;
+					msg += "@127.0.0.1 KICK ";
+					msg += channel;
+					msg += " ";
+					msg += target;
+					msg += " :";
+					msg += reason;
+					msg += "\r\n";
+					send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
+				}
+				_server->getChannels()[i]->removeClient(this);
+				_server->getChannels()[i]->removeUserMod(this);
+			}
+		}
+	}
+
 	return 0;
 }
 
+
+int				Client::inviteChan(std::string target)
+{
+//:sadt!sadto@127.0.0.1 INVITE sadto4 #General
+	if (_username.empty() || _nickname.empty() || _password == false)
+	{
+		sendMsg(ERR_NOTREGISTERED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
+		return 1;
+	}
+	std::cout << target << std::endl;
+	return 0;
+}
 int	Client::setPassword(std::string command)
 {
 	std::istringstream iss(command);

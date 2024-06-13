@@ -31,6 +31,8 @@ class Channel
 		std::vector<Client *>	getUserMod(void);
 		void					addUserMod(Client *target);
 		void					removeUserMod(Client *target);
+		bool					is_user_mod(Client *target);
+		bool					is_user(std::string nick);
 		std::string				getNicks(void);
 		// void				setUserLimit(int limit);
 		// void				setPrivate(bool is_private);
