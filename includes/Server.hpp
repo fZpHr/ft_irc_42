@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/12 18:04:30 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/13 22:00:09 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,15 @@ class Server
 		void clearClients(int fd);
 
 		int channelExist(std::string name);
+		int channelIdx(std::string name);
 		int clientExistFd(int fd);
+		int clientExistNick(std::string nick);
 		int clientExistString(std::string name);
 
 		std::vector<Client *> getClients();
 		std::vector<Channel *> getChannels();
+
+		
 
 		void checkLogin(Client *client, int fd);
 

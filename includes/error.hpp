@@ -6,13 +6,14 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/05 16:19:54 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/07 18:55:37 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/13 16:57:26 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #ifndef ERROR_HPP
 # define ERROR_HPP
+
 
 # define ERR_NOSUCHNICK(input, nick)			"401 " + input + " " + nick + " :No such nick/channel"
 # define ERR_NOSUCHCHANNEL(input, chan)			"403 " + input + " " + chan + " :No such channel"
@@ -35,6 +36,7 @@
 # define ERR_UNKNOWNMODE(input, mode)			"472 " + input + " " + mode + " :is unknown mode char to me"
 # define ERR_INVITEONLYCHAN(input, chan)		"473 " + input + " " + chan + " :Cannot join channel (+i)"
 # define ERR_BADCHANNELKEY(input, chan)			"475 " + input + " " + chan + " :Cannot join channel (+k)"
+# define ERR_NOPRIVILEGES(input)				"481 " + input + " :Permission Denied- You're not an IRC operator"
 # define ERR_CHANOPRIVSNEEDED(input, chan)		"482 " + input + " " + chan + " :You're not channel operator"
 
 #endif

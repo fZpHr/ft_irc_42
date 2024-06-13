@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/12 18:28:47 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/13 22:27:15 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ Client::Client(Server *server) : _server(server)
 	_password = false;
 	_username = "";
 	_nickname = "";
+	_alreadyInChannel = false;
 }
 
 
@@ -263,24 +264,12 @@ int	Client::joinChan(std::string target)
 			if (_server->getChannels()[i]->getName() == name)
 			{
 				_server->getChannels()[i]->addClient(this);
-				std::string msg = ":";
-				msg += _nickname;
-				msg += "!";
-				msg += _username;
-				msg += "@127.0.0.1 JOIN ";
-				msg += argument;
-				msg += "\r\n";
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
 				send(_clientFd, msg.c_str(), msg.size(), 0);
 				std::vector<Client *> lst = _server->getChannels()[i]->getUserList();
 				for (size_t j = 0; j != lst.size(); j++)
 				{
-					std::string msg = ":";
-					msg += _nickname;
-					msg += "!";
-					msg += _username;
-					msg += "@127.0.0.1 JOIN ";
-					msg += argument;
-					msg += "\r\n";
+					std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
 					send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
 				}
 				sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getNicks()));
@@ -292,37 +281,110 @@ int	Client::joinChan(std::string target)
 	}
 	else
 	{
-		Channel *new_channel = new Channel();
-		new_channel->setName(argument);
-		new_channel->addClient(this);
-		new_channel->addUserMod(this);
-		_server->addChannel(new_channel);
-		// sendMsg(":" + _nickname + "!" + _username + " JOIN :" + argument);
-		std::string msg = ":";
-		msg += _nickname;
-		msg += "!";
-		msg += _username;
-		msg += "@127.0.0.1 JOIN ";
-		msg += argument;
-		msg += "\r\n";
+		if (_alreadyInChannel)
+		{
+			sendMsg(ERR_ALREADYREGISTRED(_nickname));
+			std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You are already in a channel" << RESET << std::endl;
+			return 1;
+		}
+		std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
 		send(_clientFd, msg.c_str(), msg.size(), 0);
-		msg = ":";
-		msg += _nickname;
-		msg += "!";
-		msg += _username;
-		msg += "@127.0.0.1 MODE ";
-		msg += argument;
-		msg += " +o ";
-		msg += _nickname;
-		msg += "\r\n";
-		send(_clientFd, msg.c_str(), msg.size(), 0);
-		sendMsg(RPL_NAMREPLY(_nickname, argument, "@"+_nickname));
-		sendMsg(RPL_ENDOFNAMES(_nickname, argument));
-		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
-		sendMsg(RPL_NOTOPIC(_nickname, argument));
 	}
 	return 0;
 }
+
+int	Client::modChan(std::string target)
+{
+	if (_username.empty() || _nickname.empty() || _password == false)
+	{
+		sendMsg(ERR_NOTREGISTERED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
+		return 1;
+	}
+	std::istringstream iss(target);
+	std::string cmd;
+	std::string channel;
+	std::string mode;
+	std::string argument;
+	int add = 0;
+	iss >> cmd;
+	iss >> channel;
+	iss >> mode;
+	getline(iss, argument);
+	if (mode.empty() && !_alreadyInChannel)
+	{
+		_alreadyInChannel = true;
+		std::cout << channel << std::endl;
+		std::cout << _server->channelExist(channel) << std::endl;
+		if (!_server->channelExist(channel))
+		{
+			Channel *new_channel = new Channel();
+			new_channel->setName(channel);
+			new_channel->addClient(this);
+			new_channel->addUserMod(this);
+			new_channel->setStart(true);
+			_server->addChannel(new_channel);
+			_perms = true;
+			sendMsg(RPL_NAMREPLY(_nickname, channel, "@"+_nickname));
+			sendMsg(RPL_ENDOFNAMES(_nickname, channel));
+			sendMsg(RPL_CHANNELMODEIS(_nickname, channel, "+t"));
+			sendMsg(RPL_NOTOPIC(_nickname, channel));
+		}
+		return 0;
+	}
+	if (mode.empty() && _alreadyInChannel)
+	{
+		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "mode" << RESET << std::endl;
+		return 1;
+	}
+	if (!_server->channelExist(channel))
+	{
+		sendMsg(ERR_NOSUCHCHANNEL(cmd, channel));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No such channel" << RESET << std::endl;
+		return 1;
+	}
+	if (channel.empty())
+	{
+		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "channel" << RESET << std::endl;
+		return 1;
+	}
+	if (!_perms)
+	{
+		sendMsg(ERR_NOPRIVILEGES(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must have permissions to do that" << RESET << std::endl;
+		return 1;
+	
+	}
+	if (mode[0] != '+' && mode[0] != '-')
+	{
+		sendMsg(ERR_UNKNOWNMODE(_nickname, mode));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Unknown mode" << RESET << std::endl;
+		return 1;
+	}
+	else if (mode[0] == '+')
+		add = 1;
+	mode = mode.substr(1);
+	if (handleMode(mode) || mode.size() != 1)
+	{
+		sendMsg(ERR_UNKNOWNMODE(_nickname, mode));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Unknown mode" << RESET << std::endl;
+		return 1;
+	}
+	if (add)
+	{
+		if(handleAddMode(mode, channel, argument))
+			return 1;
+	}
+	else
+	{
+		if (handleRemoveMode(mode, channel, argument))
+			return 1;
+	}
+	return 0;
+}
+
 
 int Client::leaveChan(std::string target)
 {
@@ -368,8 +430,10 @@ int Client::leaveChan(std::string target)
 			}
 			_server->getChannels()[i]->removeClient(this);
 			_server->getChannels()[i]->removeUserMod(this);
+			
 		}
 	}
+	_alreadyInChannel = false;
 	return 0;
 }
 
@@ -505,15 +569,168 @@ int	Client::setPassword(std::string command)
 // ======================================UTILS CLIENT PART=======================================
 // ==============================================================================================
 
-int	Client::setPerms()
+int	Client::handleAddMode(std::string mode, std::string channel, std::string argument)
 {
-	if (_perms == true)
+	if (mode == "o")
+	{
+		if (argument.empty())
+		{
+			std::string send = "MODE";
+			sendMsg(ERR_NEEDMOREPARAMS(send, argument));
+			std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "argument" << RESET << std::endl;
+			return 1;
+		}
+		argument = argument.substr(1);
+		if (_server->clientExistNick(argument) == -1)
+		{
+			std::string send = "MODE";
+			sendMsg(ERR_NOSUCHNICK(send, argument));
+			std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No such nick/channel" << RESET << std::endl;
+			return 1;
+		}
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				std::cout << "ici" << std::endl;
+				_server->getChannels()[i]->addUserMod(_server->getClients()[_server->clientExistNick(argument)]);
+				_server->getClients()[_server->clientExistNick(argument)]->setPerms(true);
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " +o " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	else if (mode == "i")
+	{
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				_server->getChannels()[i]->setInviteOnly(true);
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " +i " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	else if (mode == "t")
+	{
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				_server->getChannels()[i]->setTopicMod(true);
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " +t " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	else if (mode == "k")
+	{
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				_server->getChannels()[i]->setHasPasswd(true);
+				_server->getChannels()[i]->setPasswd(argument);
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " +k " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	else if (mode == "l")
+	{
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				_server->getChannels()[i]->setLimitUserMod(true);
+				_server->getChannels()[i]->setUserLimit(std::atoi(argument.c_str()));
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " +l " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	return 0;
+}
+
+int	Client::handleRemoveMode(std::string mode, std::string channel, std::string argument)
+{
+	if (mode == "o")
+		{
+			for (size_t i = 0; i < _server->getChannels().size(); i++)
+			{
+				if (_server->getChannels()[i]->getName() == channel)
+				{
+					_server->getChannels()[i]->removeUserMod(_server->getClients()[_server->clientExistNick(argument)]);
+					_server->getClients()[_server->clientExistNick(argument)]->setPerms(false);
+					std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " -o " + argument + "\r\n";
+					send(_clientFd, msg.c_str(), msg.size(), 0);
+				}
+			}
+		}
+	else if (mode == "i")
+	{
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				_server->getChannels()[i]->setInviteOnly(false);
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " -i " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	else if (mode == "t")
+	{
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				_server->getChannels()[i]->setTopicMod(false);
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " -t " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	else if (mode == "k")
+	{
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				_server->getChannels()[i]->setHasPasswd(false);
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " -k " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	else if (mode == "l")
+	{
+		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		{
+			if (_server->getChannels()[i]->getName() == channel)
+			{
+				_server->getChannels()[i]->setLimitUserMod(false);
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " -l " + argument + "\r\n";
+				send(_clientFd, msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	return 0;
+}
+
+int	Client::setPerms(bool truefalse)
+{
+	if (truefalse == true)
 	{
 		sendMsg(ERR_ALREADYREGISTRED(_nickname));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You have already set permissions" << RESET << std::endl;
 		return 1;
 	}
-	_perms = true;
+	if (truefalse == true)
+		_perms = true;
+	else
+		_perms = false;
 	return 0;
 }
 

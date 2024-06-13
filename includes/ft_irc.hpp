@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_irc.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/10 21:01:25 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/13 18:29:14 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@
 #include <errno.h> // Fournit des macros pour signaler les erreurs
 #include <regex.h> // Fournit des fonctions pour manipuler les expressions régulières
 #include <cstring> // Fournit des fonctions pour manipuler les chaînes de caractères
+#include <ctime> // Fournit des fonctions pour manipuler les dates et les heures
+#include <string> // Fournit la classe string pour manipuler les chaînes de caractères
 
 /**
  * police defines
@@ -90,5 +92,6 @@ int handle_input(int ac, char **av);
 
 // Utils
 std::string getCurrentTime();
+int	handleMode(std::string mode);
 
 #endif

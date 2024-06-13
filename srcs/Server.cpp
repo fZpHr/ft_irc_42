@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/12 18:03:56 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/13 21:24:47 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,18 +220,16 @@ int	Server::processCommand(std::string command, int fd)
 	std::string cmd;
 	iss >> cmd;
 	int clientIndex = clientExistFd(fd);
-	const std::string commands[8] = { "USER", "NICK" , "PRIVMSG" , "JOIN", "PASS", "PART", "KICK", "INVITE"};
-	int (Client::*functions[8])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan, &Client::setPassword, &Client::leaveChan, &Client::kickChan, &Client::inviteChan};
+	const std::string commands[9] = { "USER", "NICK" , "PRIVMSG" , "JOIN", "PASS", "PART", "KICK", "INVITE", "MODE"};
+	int (Client::*functions[9])(std::string) = {&Client::setUser, &Client::setNick, &Client::prvMsg, &Client::joinChan, &Client::setPassword, &Client::leaveChan, &Client::kickChan, &Client::inviteChan, &Client::modChan};
 
-	for (int i = 0; i < 7; i++) 
+	for (int i = 0; i < 9; i++) 
 	{
 		if (cmd == commands[i])
 		{
 			int res = (_clients[clientIndex]->*functions[i])(command);
 			if (res == 1)
 				return 0;
-			// else if (res == 2)
-			// 	return 2;
 			else
 				return 1;
 		}
@@ -250,6 +248,21 @@ int	Server::processCommand(std::string command, int fd)
 //===========================================================================================
 //======================================UTILS SERV PART======================================
 //===========================================================================================
+
+
+int Server::clientExistNick(std::string nick)
+{
+	if (nick.empty())
+		return (-1);
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->getNick() == nick)
+		{
+			return (i);
+		}
+	}
+	return (-1);
+}
 
 /**
  * @brief: Remove the client from the pollfd vector and the client vector
@@ -351,81 +364,6 @@ std::vector<std::string> handleLogin(std::string &buffer)
 	return parts;
 }
 
-// void	Server::checkLogin(Client *client, int fd)
-// {
-// 	char buffer[4096]; // create a buffer to store the data
-// 	memset(buffer, 0, 4096); // set the buffer to 0
-// 	ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
-// 	if (ret  <= 0) // if the client disconnected
-// 	{
-// 		std::cout << BLACK << getCurrentTime() << "    " << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
-// 		clearClients(fd); // remove the client from the pollfd vector and the client vector
-// 		close(fd); // close the client socket
-// 		return;
-// 	}
-// 	buffer[ret] = '\0'; // add a null terminator to the buffer
-// 	std::string bufferStr(buffer);
-// 	std::vector<std::string> result = handleLogin(bufferStr);
-// 	std::string pass;
-// 	std::string nick;
-// 	std::string user;
-// 	for (std::vector<std::string>::const_iterator it = result.begin(); it != result.end(); ++it)
-// 	{
-// 		if (it->size() >= 4 && it->substr(0, 4) == "PASS")
-// 		{
-// 			pass = *it;
-// 		}
-// 		else if (it->size() >= 4 && it->substr(0, 4) == "NICK")
-// 		{
-// 			nick = *it;
-// 		}
-// 		else if (it->size() >= 4 && it->substr(0, 4) == "USER")
-// 		{
-// 			user = *it;
-// 		}
-// 	}
-// 	if (pass.substr(0, 4) == "PASS")
-// 	{
-// 		if (checkPassword(pass))
-// 		{
-// 			std::cout << BLACK << getCurrentTime() << "    " << GREEN << "Password accepted for : " << fd - 3 << RESET <<  std::endl;
-// 			client->setPassword(true);
-// 			if (!nick.empty() && !user.empty())
-// 			{
-// 				if (processCommand(nick, fd))
-// 				{
-// 					std::cout << BLACK << getCurrentTime() << "    " << GREEN << "Nick applied" << RESET << std::endl;
-// 				}
-// 				else
-// 				{
-// 					std::cout << BLACK << getCurrentTime() << "    " << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
-// 				}
-// 				if (processCommand(user, fd))
-// 				{
-// 					std::cout << BLACK << getCurrentTime() << "    " << GREEN << "User applied" << RESET << std::endl;
-// 					_clients[clientExistFd(fd)]->sendMsg(RPL_WELCOME(_clients[clientExistFd(fd)]->getNick()));
-// 					_clients[clientExistFd(fd)]->sendMsg(RPL_YOURHOST(_clients[clientExistFd(fd)]->getNick(), "localhost",  "1.0"));
-// 					_clients[clientExistFd(fd)]->sendMsg(RPL_CREATED(_clients[clientExistFd(fd)]->getNick(), "-3000 av JC"));
-// 					_clients[clientExistFd(fd)]->setRegistered(true);
-// 				}
-// 				else
-// 				{
-// 					std::cout << BLACK << getCurrentTime() << "    " << "Received " << ret << " bytes from client " << fd - 3 << ": " << buffer << std::endl;
-// 				}
-// 			}
-// 		}
-// 		else
-// 		{
-// 			client->sendMsg(ERR_PASSWDMISMATCH(pass.substr(0, 4)));
-// 			return;
-// 		}
-// 	}
-// 	else
-// 	{
-// 		std::cerr << BLACK << getCurrentTime() << "    " << BRED << "Need password to interacte with the server" << RESET << std::endl;
-// 		return;
-// 	}
-// }
 
 std::vector<std::string>	Server::handleExecCommand(std::string &command)
 {
@@ -448,10 +386,20 @@ void Server::addChannel(Channel *channel)
 	_channels.push_back(channel);
 }
 
+int	Server::channelIdx(std::string name)
+{
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		if (_channels[i]->getName() == name)
+			return (i);
+	}
+	return (-1);
+}
+
 int Server::channelExist(std::string name)
 {
 	if (name.length() == 1)
-		return (1);
+		return (0);
 	for (size_t i = 0; i < _channels.size(); i++)
 	{
 		if (_channels[i]->getName() == name)

@@ -10,10 +10,12 @@ Channel::Channel()
 	_invite_only = false;
 	_topic_mod = false;
 	_limit_user_mod = false;
+	_start = false;
 }
 
 Channel::~Channel()
 {
+
 }
 
 void	Channel::setName(std::string name)
@@ -114,60 +116,66 @@ bool					Channel::is_user(std::string nick)
 	return (false);
 }
 
-// std::vector<Client>	Channel::getUserList(void){
-// 	return _user_list;
-// }
 
-// int                 Channel::getID(void)
-// {
-// 	return _id;
-// }
+bool					Channel::getStart(void)
+{
+	return (_start);
+}
 
-// std::string         Channel::getTopic(void){
-// 	return _topic;
+void					Channel::setStart(bool start)
+{
+	if (start == false)
+		_start = false;
+	else
+		_start = true;
+}
 
-// }
+bool					Channel::getInviteOnly(void)
+{
+	return (_invite_only);
+}
 
-// std::string         Channel::getPasswd(void){
-// 	return _passwd;
-// }
+void					Channel::setInviteOnly(bool invite_only)
+{
+	_invite_only = invite_only;
+}
 
-// bool                Channel::getPrivate(void){
-// 	return _is_private;
-// }
+bool					Channel::getTopicMod(void)
+{
+	return (_topic_mod);
+}
 
-// int                 Channel::getUserLimit(void){
-// 	return _user_limit;
-// }
+void					Channel::setTopicMod(bool topic_mod)
+{
+	_topic_mod = topic_mod;
+}
 
-// bool                Channel::hasPass(void){
-// 	return _has_passwd;
-// }
+bool					Channel::getPasswd(void)
+{
+	return (_has_passwd);
+}
 
-// bool                Channel::isInviteOnly(void){
-// 	return _invite_only;
-// }
-// bool                Channel::isTopicMod(void){
-// 	return _topic_mod;
-// }
+void					Channel::setPasswd(std::string passwd)
+{
+	_passwd = passwd;
+}
 
-// bool                Channel::isLimitUserMod(void){
-// 	return _limit_user_mod;
-// }
+void					Channel::setHasPasswd(bool has_passwd)
+{
+	_has_passwd = has_passwd;
+}
 
-// void                Channel::setTopic(std::string topic){
-// 	_topic = topic;
-// }
+bool					Channel::getLimitUserMod(void)
+{
+	return (_limit_user_mod);
+}
 
-// void                Channel::setUserLimit(int limit){
-// 	_user_limit = limit;
-// }
+void					Channel::setLimitUserMod(bool limit_user_mod)
+{
+	_limit_user_mod = limit_user_mod;
+}
 
-// void                Channel::setPrivate(bool is_private){
-// 	_is_private = is_private;
-// }
-
-// void                Channel::setPasswd(std::string passwd){
-// 	_passwd = passwd;
-// }
-
+void					Channel::setUserLimit(int limit_user_mod)
+{
+	_user_limit = limit_user_mod;
+}

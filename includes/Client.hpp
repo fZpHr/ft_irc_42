@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:48:40 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/10 20:47:28 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/13 22:15:55 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,13 +31,16 @@ class Client
 		std::string		getUser();
 		int				setNick(std::string nick);
 		std::string		getNick();
-		int				setPerms();
+		int				setPerms(bool trueFalse);
 		bool			getPerms();
+
+
 		int				prvMsg(std::string input);
 		int				joinChan(std::string target);
 		int 			kickChan(std::string args);
 		int				leaveChan(std::string target);
 		int				inviteChan(std::string target);
+		int				modChan(std::string target);
 
 		int				setPassword(std::string command);
 		bool			getPassword();
@@ -47,6 +50,9 @@ class Client
 
 		void			setRegistered(bool registered);
 		bool			getRegistered();
+
+		int			handleAddMode(std::string mode, std::string channel, std::string argument);
+		int			handleRemoveMode(std::string mode, std::string channel, std::string argument);
 
 
 	
@@ -62,6 +68,7 @@ class Client
 		bool			_perms;
 		bool			_password;
 		bool			_registered;
+		bool			_alreadyInChannel;
 	
 };
 

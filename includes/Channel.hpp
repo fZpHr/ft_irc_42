@@ -34,22 +34,24 @@ class Channel
 		bool					is_user_mod(Client *target);
 		bool					is_user(std::string nick);
 		std::string				getNicks(void);
-		// void				setUserLimit(int limit);
-		// void				setPrivate(bool is_private);
-		// void				setPasswd(std::string passwd);
-		// void				setHasPasswd(bool has_passwd);
-		// void				setInviteOnly(bool invite_only);
-		// void				setTopicMod(bool topic_mod);
-		// std::vector<Client>	getUserList(void);
-		// int					getID(void);
-		// std::string			getTopic(void);
-		// std::string			getPasswd(void);
-		// bool				getPrivate(void);
-		// int					getUserLimit(void);
-		// bool				hasPass(void);
-		// bool				isInviteOnly(void);
-		// bool				isTopicMod(void);
-		// bool				isLimitUserMod(void);
+
+		bool					getStart(void);
+		void					setStart(bool start);
+
+		bool					getInviteOnly(void);
+		void					setInviteOnly(bool invite_only);
+
+		bool					getTopicMod(void);
+		void					setTopicMod(bool topic_mod);
+
+		bool					getPasswd(void);
+		void					setPasswd(std::string passwd);
+		void					setHasPasswd(bool has_passwd);
+
+		bool					getLimitUserMod(void);
+		void					setUserLimit(int limit_user_mod);
+		void					setLimitUserMod(bool limit_user_mod);
+
 
 	private:
 		Channel(Channel const &src);
@@ -65,6 +67,7 @@ class Channel
 		bool				_invite_only;
 		bool				_topic_mod;
 		bool				_limit_user_mod;
+		bool				_start;
 };
 
 #endif
