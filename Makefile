@@ -63,7 +63,7 @@ clean_bot:
 	@echo "\033[01m\033[31mRemoving objects ...\033[00m"
 
 fclean:	clean
-	@${RM} ${NAME}
+	@${RM} ${NAME} bot
 	@echo "\033[01m\033[31mRemoving exec : ${NAME} ...\033[00m"
 
 fclean_bot:	clean_bot
