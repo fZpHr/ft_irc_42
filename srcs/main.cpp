@@ -58,6 +58,7 @@ int main(int ac, char **av)
 	catch(const std::exception& e)
 	{
 		server.closeFds();
+		server.freeClients();
 		std::cerr << e.what() << '\n';
 	}
 	
