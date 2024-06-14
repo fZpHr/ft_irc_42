@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/14 19:25:46 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/14 19:34:31 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -486,8 +486,8 @@ int Client::kickChan(std::string args)
 					msg += "\r\n";
 					send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
 				}
-				_server->getChannels()[i]->removeClient(this);
-				_server->getChannels()[i]->removeUserMod(this);
+				_server->getChannels()[i]->removeClient(target);
+				_server->getChannels()[i]->removeUserMod(target);
 			}
 		}
 	}

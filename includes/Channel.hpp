@@ -27,10 +27,13 @@ class Channel
 		std::string		getTopic();
 		void			addClient(Client *client);
 		void			removeClient(Client *client);
+		void			removeClient(std::string target);
+		Client			*getClient(std::string str);
 		std::vector<Client *>	getUserList(void);
 		std::vector<Client *>	getUserMod(void);
 		void					addUserMod(Client *target);
 		void					removeUserMod(Client *target);
+		void					removeUserMod(std::string target);
 		bool					is_user_mod(Client *target);
 		bool					is_user(std::string nick);
 		std::string				getNicks(void);
