@@ -60,11 +60,11 @@ void					Channel::addUserMod(Client *target)
 
 void			Channel::removeClient(Client *client)
 {
-	for (std::vector<Client *>::iterator itr = _userList.begin(); itr != _userList.end(); ++itr)
+	for (size_t i = 0; i != _userList.size(); i++)
 	{
-		if ((*itr)->getUser() == client->getUser())
+		if (_userList[i]->getNick() == client->getNick())
 		{
-			_userList.erase(itr);
+			_userList.erase(_userList.begin() + i);
 			return ;
 		}
 	}
@@ -72,11 +72,11 @@ void			Channel::removeClient(Client *client)
 
 void			Channel::removeUserMod(Client *client)
 {
-	for (std::vector<Client *>::iterator itr = _mod.begin(); itr != _mod.end(); ++itr)
+	for (size_t i = 0; i != _mod.size(); i++)
 	{
-		if ((*itr)->getUser() == client->getUser())
+		if (_mod[i]->getNick() == client->getNick())
 		{
-			_mod.erase(itr);
+			_mod.erase(_mod.begin() + i);
 			return ;
 		}
 	}
@@ -87,7 +87,7 @@ std::string				Channel::getNicks(void)
 	std::string list = "";
 	for (size_t i = 0; i < _userList.size(); i++)
 	{
-		if (i == 0)
+		if (is_user_mod(_userList[i]) == true)
 			list += "@";
 		list += _userList[i]->getNick();
 		list += " ";
