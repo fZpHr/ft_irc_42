@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/13 21:24:47 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/14 20:04:07 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -406,6 +406,19 @@ int Server::channelExist(std::string name)
 			return (1);
 	}
 	return (0);
+}
+
+
+Channel *Server::getChannel(std::string name)
+{
+	for (size_t i = 0; i != _channels.size(); i++)
+	{
+		if (name == _channels[i]->getName())
+		{
+			return (_channels[i]);
+		}
+	}
+	return NULL;
 }
 
 std::vector<Client *> Server::getClients()

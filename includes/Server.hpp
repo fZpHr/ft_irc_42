@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/13 22:00:09 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/14 19:53:27 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ class Server
 
 		std::vector<Client *> getClients();
 		std::vector<Channel *> getChannels();
-
+		Channel *getChannel(std::string name);
 		
 
 		void checkLogin(Client *client, int fd);
@@ -56,8 +56,6 @@ class Server
 		std::string getPassword();
 
 		void freeClients();
-
-		void pingClients();
 		
 
 		//DEBUG PURPOSE

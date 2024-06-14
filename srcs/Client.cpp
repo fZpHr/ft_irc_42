@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/14 19:34:31 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/14 20:05:56 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,11 +239,6 @@ int	Client::joinChan(std::string target)
 	iss >> argument;
 	iss >> error;
 
-	if (!error.empty())
-	{
-		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Too many arguments" << RESET << std::endl;
-		return 1;
-	}
 	if (argument.empty())
 	{
 		sendMsg(ERR_NEEDMOREPARAMS(word, word));
@@ -256,12 +251,21 @@ int	Client::joinChan(std::string target)
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No such channel" << RESET << std::endl;
 		return 1;
 	}
+	Channel *chan = _server->getChannel(argument);
+	if ((!chan && !error.empty()) || (!error.empty() && !chan->getPasswd()))
+	{
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Too many arguments" << RESET << std::endl;
+		return 1;
+	}
+	if (chan && chan->getPasswd())
+	{
+		std::cout << argument << std::endl;
+	}
 	if (_server->channelExist(argument))
 	{
 		for (size_t i = 0; i < _server->getChannels().size(); i++)
 		{
-			std::string name = argument;
-			if (_server->getChannels()[i]->getName() == name)
+			if (_server->getChannels()[i]->getName() == argument)
 			{
 				_server->getChannels()[i]->addClient(this);
 				std::vector<Client *> lst = _server->getChannels()[i]->getUserList();
@@ -606,7 +610,7 @@ int	Client::handleAddMode(std::string mode, std::string channel, std::string arg
 			{
 				_server->getChannels()[i]->setHasPasswd(true);
 				_server->getChannels()[i]->setPasswd(argument);
-				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " +k " + argument + "\r\n";
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " +k :" + argument + "\r\n";
 				send(_clientFd, msg.c_str(), msg.size(), 0);
 			}
 		}
