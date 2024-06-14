@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/13 22:27:15 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/14 15:42:39 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,8 +264,6 @@ int	Client::joinChan(std::string target)
 			if (_server->getChannels()[i]->getName() == name)
 			{
 				_server->getChannels()[i]->addClient(this);
-				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
-				send(_clientFd, msg.c_str(), msg.size(), 0);
 				std::vector<Client *> lst = _server->getChannels()[i]->getUserList();
 				for (size_t j = 0; j != lst.size(); j++)
 				{
@@ -281,14 +279,19 @@ int	Client::joinChan(std::string target)
 	}
 	else
 	{
-		if (_alreadyInChannel)
-		{
-			sendMsg(ERR_ALREADYREGISTRED(_nickname));
-			std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You are already in a channel" << RESET << std::endl;
-			return 1;
-		}
 		std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
 		send(_clientFd, msg.c_str(), msg.size(), 0);
+		Channel *new_channel = new Channel();
+		new_channel->setName(argument);
+		new_channel->addClient(this);
+		new_channel->addUserMod(this);
+		new_channel->setStart(true);
+		_server->addChannel(new_channel);
+		_perms = true;
+		sendMsg(RPL_NAMREPLY(_nickname, argument, "@"+_nickname));
+		sendMsg(RPL_ENDOFNAMES(_nickname, argument));
+		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
+		sendMsg(RPL_NOTOPIC(_nickname, argument));
 	}
 	return 0;
 }
@@ -311,33 +314,8 @@ int	Client::modChan(std::string target)
 	iss >> channel;
 	iss >> mode;
 	getline(iss, argument);
-	if (mode.empty() && !_alreadyInChannel)
-	{
-		_alreadyInChannel = true;
-		std::cout << channel << std::endl;
-		std::cout << _server->channelExist(channel) << std::endl;
-		if (!_server->channelExist(channel))
-		{
-			Channel *new_channel = new Channel();
-			new_channel->setName(channel);
-			new_channel->addClient(this);
-			new_channel->addUserMod(this);
-			new_channel->setStart(true);
-			_server->addChannel(new_channel);
-			_perms = true;
-			sendMsg(RPL_NAMREPLY(_nickname, channel, "@"+_nickname));
-			sendMsg(RPL_ENDOFNAMES(_nickname, channel));
-			sendMsg(RPL_CHANNELMODEIS(_nickname, channel, "+t"));
-			sendMsg(RPL_NOTOPIC(_nickname, channel));
-		}
-		return 0;
-	}
-	if (mode.empty() && _alreadyInChannel)
-	{
-		sendMsg(ERR_NEEDMOREPARAMS(cmd, cmd));
-		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "mode" << RESET << std::endl;
+	if (mode.empty())
 		return 1;
-	}
 	if (!_server->channelExist(channel))
 	{
 		sendMsg(ERR_NOSUCHCHANNEL(cmd, channel));
@@ -430,11 +408,9 @@ int Client::leaveChan(std::string target)
 			}
 			_server->getChannels()[i]->removeClient(this);
 			_server->getChannels()[i]->removeUserMod(this);
-			
 		}
 	}
-	_alreadyInChannel = false;
-	return 0;
+	return 0; 	
 }
 
 int Client::kickChan(std::string args)
@@ -592,7 +568,6 @@ int	Client::handleAddMode(std::string mode, std::string channel, std::string arg
 		{
 			if (_server->getChannels()[i]->getName() == channel)
 			{
-				std::cout << "ici" << std::endl;
 				_server->getChannels()[i]->addUserMod(_server->getClients()[_server->clientExistNick(argument)]);
 				_server->getClients()[_server->clientExistNick(argument)]->setPerms(true);
 				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 MODE " + channel + " +o " + argument + "\r\n";
@@ -657,6 +632,21 @@ int	Client::handleRemoveMode(std::string mode, std::string channel, std::string 
 {
 	if (mode == "o")
 		{
+			if (argument.empty())
+			{
+				std::string send = "MODE";
+				sendMsg(ERR_NEEDMOREPARAMS(send, argument));
+				std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "argument" << RESET << std::endl;
+				return 1;
+			}
+			argument = argument.substr(1);
+			if (_server->clientExistNick(argument) == -1)
+			{
+				std::string send = "MODE";
+				sendMsg(ERR_NOSUCHNICK(send, argument));
+				std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "No such nick/channel" << RESET << std::endl;
+				return 1;
+			}
 			for (size_t i = 0; i < _server->getChannels().size(); i++)
 			{
 				if (_server->getChannels()[i]->getName() == channel)
@@ -721,7 +711,7 @@ int	Client::handleRemoveMode(std::string mode, std::string channel, std::string 
 
 int	Client::setPerms(bool truefalse)
 {
-	if (truefalse == true)
+	if (_perms == true && truefalse == true)
 	{
 		sendMsg(ERR_ALREADYREGISTRED(_nickname));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You have already set permissions" << RESET << std::endl;
