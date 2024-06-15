@@ -267,7 +267,7 @@ int	Client::joinChan(std::string target)
 			sendMsg(RPL_NAMREPLY(_nickname, argument, chan->getNicks()));
 			sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 			sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
-			sendMsg(RPL_NOTOPIC(_nickname, argument));
+			chan->getTopic().empty() ? sendMsg(RPL_NOTOPIC(_nickname, argument)) : sendMsg(RPL_TOPIC(_nickname, argument, chan->getTopic()));
 			return 0;
 		} else {
 			sendMsg(ERR_INVITEONLYCHAN(word, argument));
@@ -294,32 +294,26 @@ int	Client::joinChan(std::string target)
 			sendMsg(RPL_NAMREPLY(_nickname, argument, chan->getNicks()));
 			sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 			sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
-			sendMsg(RPL_NOTOPIC(_nickname, argument));
+			chan->getTopic().empty() ? sendMsg(RPL_NOTOPIC(_nickname, argument)) : sendMsg(RPL_TOPIC(_nickname, argument, chan->getTopic()));
 			return 0;
 		} else {
 			sendMsg(ERR_BADCHANNELKEY(word, argument));
 			return 1;
 		}
 	}
-	if (_server->channelExist(argument))
+	if (chan)
 	{
-		for (size_t i = 0; i < _server->getChannels().size(); i++)
+		chan->addClient(this);
+		std::vector<Client *> lst = chan->getUserList();
+		for (size_t j = 0; j != lst.size(); j++)
 		{
-			if (_server->getChannels()[i]->getName() == argument)
-			{
-				_server->getChannels()[i]->addClient(this);
-				std::vector<Client *> lst = _server->getChannels()[i]->getUserList();
-				for (size_t j = 0; j != lst.size(); j++)
-				{
-					std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
-					send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
-				}
-				sendMsg(RPL_NAMREPLY(_nickname, argument, _server->getChannels()[i]->getNicks()));
-				sendMsg(RPL_ENDOFNAMES(_nickname, argument));
-				sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
-				sendMsg(RPL_NOTOPIC(_nickname, argument));
-			}
+			std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
+			send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
 		}
+		sendMsg(RPL_NAMREPLY(_nickname, argument, chan->getNicks()));
+		sendMsg(RPL_ENDOFNAMES(_nickname, argument));
+		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
+		chan->getTopic().empty() ? sendMsg(RPL_NOTOPIC(_nickname, argument)) : sendMsg(RPL_TOPIC(_nickname, argument, chan->getTopic()));
 	}
 	else
 	{
@@ -336,6 +330,59 @@ int	Client::joinChan(std::string target)
 		sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
 		sendMsg(RPL_NOTOPIC(_nickname, argument));
+	}
+	return 0;
+}
+
+int Client::topic(std::string target)
+{
+	if (_username.empty() || _nickname.empty() || _password == false)
+	{
+		sendMsg(ERR_NOTREGISTERED(_nickname));
+		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
+		return 1;
+	}
+	std::istringstream iss(target);
+	std::string cmd;
+	std::string channel;
+	std::string arguments;
+
+	iss >> cmd;
+	iss >> channel;
+	iss >> arguments;
+
+	Channel *chan = _server->getChannel(channel);
+	if (!chan)
+	{
+		sendMsg(ERR_NOSUCHCHANNEL(_nickname, channel));
+		return 1;
+	}
+	if (arguments.empty())
+	{
+		if (chan->getTopic().empty())
+		{
+			sendMsg(RPL_NOTOPIC(_nickname, channel));
+			return 1;
+		} else {
+			sendMsg(RPL_TOPIC(_nickname, channel, chan->getTopic()));
+		}
+	} else {
+		while (true)
+		{
+			std::string t;
+			iss >> t;
+			if (t.empty())
+				break ;
+			arguments += " " + t;
+		}
+		chan->setTopic(arguments);
+		std::vector<Client *> lst = chan->getUserList();
+		for (size_t j = 0; j != lst.size(); j++)
+		{
+			std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 TOPIC " + channel + " :" + arguments + "\r\n";
+			send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
+		}
+		sendMsg(RPL_TOPIC(_nickname, channel, chan->getTopic()));
 	}
 	return 0;
 }

@@ -40,6 +40,7 @@ class Client
 		int				leaveChan(std::string target);
 		int				inviteChan(std::string target);
 		int				modChan(std::string target);
+		int				topic(std::string target);
 
 		int				setPassword(std::string command);
 		bool			getPassword();
