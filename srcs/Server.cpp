@@ -214,6 +214,17 @@ void Server::receiveData(int fd)
 	}
 }
 
+
+Client *Server::getClient(std::string nick)
+{
+	for (std::vector<Client *>::iterator itr = _clients.begin(); itr != _clients.end(); ++itr)
+	{
+		if ((*itr)->getNick() == nick)
+			return (*itr);
+	}
+	return (NULL);
+}
+
 int	Server::processCommand(std::string command, int fd)
 {
 	std::istringstream iss(command);

@@ -50,6 +50,7 @@ class Server
 		
 
 		void checkLogin(Client *client, int fd);
+		Client *getClient(std::string nick);
 
 		int	processCommand(std::string command, int fd);
 

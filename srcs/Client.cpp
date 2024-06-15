@@ -252,6 +252,28 @@ int	Client::joinChan(std::string target)
 		return 1;
 	}
 	Channel *chan = _server->getChannel(argument);
+	if (chan && chan->getInviteOnly())
+	{
+		if (chan->isListed(getNick()))
+		{
+			chan->removeList(this);
+			chan->addClient(this);
+			std::vector<Client *> lst = chan->getUserList();
+			for (size_t j = 0; j != lst.size(); j++)
+			{
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
+				send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
+			}
+			sendMsg(RPL_NAMREPLY(_nickname, argument, chan->getNicks()));
+			sendMsg(RPL_ENDOFNAMES(_nickname, argument));
+			sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
+			sendMsg(RPL_NOTOPIC(_nickname, argument));
+			return 0;
+		} else {
+			sendMsg(ERR_INVITEONLYCHAN(word, argument));
+			return 1;
+		}
+	}
 	if ((!chan && !error.empty()) || (!error.empty() && !chan->getPasswd()))
 	{
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "Too many arguments" << RESET << std::endl;
@@ -520,13 +542,49 @@ int Client::kickChan(std::string args)
 int				Client::inviteChan(std::string target)
 {
 //:sadt!sadto@127.0.0.1 INVITE sadto4 #General
+	std::istringstream iss(target);
+	std::string cmd;
+	std::string channel;
+	std::string nick;
+	iss >> cmd;
+	iss >> nick;
+	iss >> channel;
 	if (_username.empty() || _nickname.empty() || _password == false)
 	{
 		sendMsg(ERR_NOTREGISTERED(_nickname));
 		std::cerr << BLACK << getCurrentTime() << "    " << RED << "Input error: " << "You must be registered first" << RESET << std::endl;
 		return 1;
 	}
-	std::cout << target << std::endl;
+	Channel *chan = _server->getChannel(channel);
+	if (!chan)
+	{
+		sendMsg(ERR_NOSUCHCHANNEL(nick, channel));
+		return 1;
+	}
+	if (chan->is_user(nick))
+	{
+		sendMsg(ERR_USERONCHANNEL(nick, nick, channel));
+		return 1;
+	}
+	if (!chan->isListed(nick))
+	{
+		chan->addList(_server->getClient(nick));
+		std::string msg = ":localhost 341 " + _nickname +" " + nick + " " + channel + "\r\n";
+		send(_clientFd, msg.c_str(), msg.size(), 0);
+		for (size_t j = 0; j != chan->getUserList().size(); j++)
+		{
+			msg = ":";
+			msg += _nickname;
+			msg += "!";
+			msg += _username;
+			msg += "@127.0.0.1 INVITE ";
+			msg += nick;
+			msg += " ";
+			msg += channel;
+			msg += "\r\n";
+			send(chan->getUserList()[j]->get_fd(), msg.c_str(), msg.size(), 0);
+		}
+	}
 	return 0;
 }
 int	Client::setPassword(std::string command)

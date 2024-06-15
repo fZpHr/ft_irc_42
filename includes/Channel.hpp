@@ -31,6 +31,7 @@ class Channel
 		Client			*getClient(std::string str);
 		std::vector<Client *>	getUserList(void);
 		std::vector<Client *>	getUserMod(void);
+		
 		void					addUserMod(Client *target);
 		void					removeUserMod(Client *target);
 		void					removeUserMod(std::string target);
@@ -56,6 +57,10 @@ class Channel
 		void					setUserLimit(int limit_user_mod);
 		void					setLimitUserMod(bool limit_user_mod);
 
+		std::vector<Client *>	getList(void);
+		bool					isListed(std::string nick);
+		void					addList(Client *client);
+		void					removeList(Client *client);
 
 	private:
 		Channel(Channel const &src);
@@ -63,6 +68,7 @@ class Channel
 		std::string			_name;
 		std::vector<Client *> _userList;
 		std::vector<Client *> _mod;
+		std::vector<Client *> _invited;
 		int					_id;
 		std::string			_topic;
 		int					_user_limit;

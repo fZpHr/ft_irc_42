@@ -220,3 +220,36 @@ void					Channel::setUserLimit(int limit_user_mod)
 {
 	_user_limit = limit_user_mod;
 }
+
+
+std::vector<Client *>	Channel::getList(void)
+{
+	return (_invited);
+}
+
+bool	Channel::isListed(std::string nick)
+{
+	for (std::vector<Client *>::iterator itr = _invited.begin(); itr != _invited.end(); ++itr)
+	{
+		if ((*itr)->getNick() == nick)
+			return (true);
+	}
+	return (false);
+}
+
+void	Channel::addList(Client *client)
+{
+	_invited.push_back(client);
+}
+
+void	Channel::removeList(Client *client)
+{
+	for (size_t i = 0; i != _invited.size(); i++)
+	{
+		if (_invited[i]->getNick() == client->getNick())
+		{
+			_invited.erase(_invited.begin() + i);
+			return ;
+		}
+	}
+}
