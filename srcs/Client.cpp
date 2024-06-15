@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/14 20:05:56 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/15 17:54:56 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,6 +264,7 @@ int	Client::joinChan(std::string target)
 				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
 				send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
 			}
+			_alreadyInChannel = true;
 			sendMsg(RPL_NAMREPLY(_nickname, argument, chan->getNicks()));
 			sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 			sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
@@ -291,6 +292,7 @@ int	Client::joinChan(std::string target)
 				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
 				send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
 			}
+			_alreadyInChannel = true;
 			sendMsg(RPL_NAMREPLY(_nickname, argument, chan->getNicks()));
 			sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 			sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
@@ -310,6 +312,7 @@ int	Client::joinChan(std::string target)
 			std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
 			send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
 		}
+		_alreadyInChannel = true;
 		sendMsg(RPL_NAMREPLY(_nickname, argument, chan->getNicks()));
 		sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
@@ -326,6 +329,7 @@ int	Client::joinChan(std::string target)
 		new_channel->setStart(true);
 		_server->addChannel(new_channel);
 		_perms = true;
+		_alreadyInChannel = true;
 		sendMsg(RPL_NAMREPLY(_nickname, argument, "@"+_nickname));
 		sendMsg(RPL_ENDOFNAMES(_nickname, argument));
 		sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
@@ -499,6 +503,7 @@ int Client::leaveChan(std::string target)
 			}
 			_server->getChannels()[i]->removeClient(this);
 			_server->getChannels()[i]->removeUserMod(this);
+			_alreadyInChannel = false;
 		}
 	}
 	return 0; 	
@@ -914,4 +919,14 @@ bool	Client::getPerms()
 bool	Client::getPassword()
 {
 	return (_password);
+}
+
+void	Client::setAlreadyInChannel(bool alreadyInChannel)
+{
+	_alreadyInChannel = alreadyInChannel;
+}
+
+bool	Client::getAlreadyInChannel()
+{
+	return (_alreadyInChannel);
 }

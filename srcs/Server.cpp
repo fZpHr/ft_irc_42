@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/14 20:04:07 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/15 17:35:59 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ void Server::start()
 		}
 	}
 	closeFds(); // close all clients and the server socket
+	freeChannels(); // free the channels
 	freeClients(); // free the clients
 }
 
@@ -171,7 +172,8 @@ void Server::acceptClient()
 */
 void Server::receiveData(int fd)
 {
-	Client *client = getClients()[clientExistFd(fd)];
+	int clientIndex = clientExistFd(fd);
+	Client *client = getClients()[clientIndex];
 	
 	char buffer[4096]; // create a buffer to store the data
 	memset(buffer, 0, 4096); // set the buffer to 0
@@ -179,6 +181,15 @@ void Server::receiveData(int fd)
 	ssize_t ret = recv(fd, buffer, 4096, 0); // receive the data from the client
 	if (ret  <= 0) // if the client disconnected
 	{
+		if (_clients[clientIndex]->getAlreadyInChannel())
+		{
+			for (size_t i = 0; i < _channels.size(); i++)
+			{
+				_channels[i]->removeClient(_clients[clientIndex]);
+				_channels[i]->removeUserMod(_clients[clientIndex]);
+			}
+			_clients[clientIndex]->setAlreadyInChannel(false);
+		}
 		std::cout << BLACK << getCurrentTime() << "    " << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
 		clearClients(fd); // remove the client from the pollfd vector and the client vector
 		close(fd); // close the client socket
@@ -246,10 +257,19 @@ int	Server::processCommand(std::string command, int fd)
 		}
 		else if (cmd == "QUIT")
 		{
+			if (_clients[clientIndex]->getAlreadyInChannel())
+			{
+				for (size_t i = 0; i < _channels.size(); i++)
+				{
+					_channels[i]->removeClient(_clients[clientIndex]);
+					_channels[i]->removeUserMod(_clients[clientIndex]);
+				}
+				_clients[clientIndex]->setAlreadyInChannel(false);
+			}
 			std::cout << BLACK << getCurrentTime() << "    " << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
-			clearClients(fd);
-			close(fd);
-			delete _clients[clientIndex];
+			// clearClients(fd);
+			// close(fd);
+			// delete _clients[clientIndex];
 			return 2;
 		}
 	}
@@ -310,6 +330,7 @@ void	Server::closeFds()
 	{
 		std::cout << BLACK << getCurrentTime() << "    " << RED << "Closing client " << _clients[i]->get_fd() - 3 << RESET << std::endl;
 		close(_fds[i].fd);
+		close(_clients[i]->get_fd());
 	}
 	if (_serverSocketFd != -1)
 		close(_serverSocketFd);
@@ -346,7 +367,7 @@ int Server::clientExistString(std::string name)
 		return (-1);
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
-		if (_clients[i]->getUser() == name || _clients[i]->getNick() == name)
+		if (_clients[i]->getNick() == name)
 		{
 			return (i);
 		}
@@ -455,6 +476,14 @@ void Server::freeClients()
 	}
 }
 
+void Server::freeChannels()
+{
+	for (size_t i = 0; i < _channels.size(); i++)
+	{
+		delete _channels[i];
+	}
+}
+
 
 
 
@@ -491,18 +520,26 @@ void Server::printState()
 	std::cout << BLACK << getCurrentTime() << "    " << YELLOW << "------------------------" << RESET << std::endl;
 	std::cout << BLACK << getCurrentTime() << "    " << "Channels: " << _channels.size() << std::endl;
 	std::cout << BLACK << getCurrentTime() << "    " << GREEN << "-----------" << RESET << std::endl;
-	if (_channels.size() > 0)
-	{
-		for (size_t i = 0; i < _channels.size(); i++)
-		{
-			std::cout << BLACK << getCurrentTime() << "    " << "Channel name: " << _channels[i]->getName() << std::endl;
-			std::cout << BLACK << getCurrentTime() << "    " << "Channel topic: " << _channels[i]->getTopic() << std::endl;
-			// std::cout << BLACK << getCurrentTime() << "    " << "Channel user limit: " << _channels[i]->getUserLimit() << std::endl;
-			// std::cout << BLACK << getCurrentTime() << "    " << "Channel private: " << _channels[i]->getPrivate() << std::endl;
-			if (i < _channels.size() - 1)
-				std::cout << BLACK << getCurrentTime() << "    " << GREEN << "-----------" << RESET << std::endl;
-		}
-	}
+    if (_channels.size() > 0)
+    {
+        for (size_t i = 0; i < _channels.size(); i++)
+        {
+            std::cout << BLACK << getCurrentTime() << "    " << "Channel name: " << _channels[i]->getName() << std::endl;
+            std::cout << BLACK << getCurrentTime() << "    " << "Channel topic: " << _channels[i]->getTopic() << std::endl;
+            // std::cout << BLACK << getCurrentTime() << "    " << "Channel user limit: " << _channels[i]->getUserLimit() << std::endl;
+            // std::cout << BLACK << getCurrentTime() << "    " << "Channel private: " << _channels[i]->getPrivate() << std::endl;
+            for (size_t i = 0; i < getChannels().size(); i++)
+            {
+                std::vector<Client *> lst = getChannels()[i]->getUserList();
+                for (size_t j = 0; j != lst.size(); j++)
+                {
+                    std::cout << BLACK << getCurrentTime() << "    " << "Client nick: " << lst[j]->getNick() << std::endl;
+                }
+            }
+            if (i < _channels.size() - 1)
+                std::cout << BLACK << getCurrentTime() << "    " << GREEN << "-----------" << RESET << std::endl;
+        }
+    }
 }
 
 

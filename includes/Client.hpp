@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:48:40 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/14 19:30:49 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/15 15:05:55 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,9 @@ class Client
 
 		int			handleAddMode(std::string mode, std::string channel, std::string argument);
 		int			handleRemoveMode(std::string mode, std::string channel, std::string argument);
+
+		void		setAlreadyInChannel(bool alreadyInChannel);
+		bool		getAlreadyInChannel();
 
 
 	
