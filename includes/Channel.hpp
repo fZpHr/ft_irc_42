@@ -48,6 +48,7 @@ class Channel
 		void					setTopicMod(bool topic_mod);
 
 		bool					getPasswd(void);
+		std::string				getpass(void);
 		void					setPasswd(std::string passwd);
 		void					setHasPasswd(bool has_passwd);
 

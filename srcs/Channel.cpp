@@ -106,6 +106,12 @@ void			Channel::removeUserMod(std::string target)
 	}
 }
 
+
+std::string				Channel::getpass(void)
+{
+	return (_passwd);
+}
+
 std::string				Channel::getNicks(void)
 {
 	std::string list = "";
@@ -192,7 +198,7 @@ bool					Channel::getPasswd(void)
 
 void					Channel::setPasswd(std::string passwd)
 {
-	_passwd = passwd;
+	_passwd = passwd.substr(1);
 }
 
 void					Channel::setHasPasswd(bool has_passwd)

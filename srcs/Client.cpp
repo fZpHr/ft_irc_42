@@ -259,7 +259,25 @@ int	Client::joinChan(std::string target)
 	}
 	if (chan && chan->getPasswd())
 	{
-		std::cout << argument << std::endl;
+		std::string pass = error;
+		if (pass == chan->getpass())
+		{
+			chan->addClient(this);
+			std::vector<Client *> lst = chan->getUserList();
+			for (size_t j = 0; j != lst.size(); j++)
+			{
+				std::string msg = ":" + _nickname + "!" + _username + "@127.0.0.1 JOIN " + argument + "\r\n";
+				send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
+			}
+			sendMsg(RPL_NAMREPLY(_nickname, argument, chan->getNicks()));
+			sendMsg(RPL_ENDOFNAMES(_nickname, argument));
+			sendMsg(RPL_CHANNELMODEIS(_nickname, argument, "+t"));
+			sendMsg(RPL_NOTOPIC(_nickname, argument));
+			return 0;
+		} else {
+			sendMsg(ERR_BADCHANNELKEY(word, argument));
+			return 1;
+		}
 	}
 	if (_server->channelExist(argument))
 	{
