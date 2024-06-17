@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:24 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/17 16:28:55 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 18:00:19 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,7 +219,7 @@ int	Client::joinChan(std::string target)
 	Channel *chan = _server->getChannel(argument);
 	if (chan && chan->getLimitUserMod() == true)
 	{
-		if (static_cast<unsigned long>(chan->getUserLimit()) >= chan->getUserClient().size())
+		if (static_cast<unsigned long>(chan->getUserLimit()) <= chan->getUserClient().size())
 		{
 			sendMsg(ERR_CHANNELISFULL(_nickname, argument));
 			return 1;
