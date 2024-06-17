@@ -21,45 +21,43 @@ class Channel
 		Channel();
 		~Channel();
 
-		void			setName(std::string name);
-		void			setTopic(std::string topic);
-		std::string		getName();
-		std::string		getTopic();
-		void			addClient(Client *client);
-		void			removeClient(Client *client);
-		void			removeClient(std::string target);
-		Client			*getClient(std::string str);
+		void					setName(std::string name);
+		void					setTopic(std::string topic);
+		std::string				getName();
+		void					setInviteOnly(bool invite_only);
+		void					setTopicMod(bool topic_mod);
+		void					setPasswd(std::string passwd);
+		void					setHasPasswd(bool has_passwd);
+		void					setUserLimit(int limit_user_mod);
+		void					setStart(bool start);
+		void					setLimitUserMod(bool limit_user_mod);
 		
+		Client					*getClient(std::string str);
+		std::string				getTopic();
 		std::vector<Client *>	getUserList(void);
 		std::vector<Client *>	getUserMod(void);
 		std::vector<Client *>	getUserClient(void);
+		bool					getInviteOnly(void);
+		bool					getTopicMod(void);
+		bool					getPasswd(void);
+		std::string				getpass(void);
+		bool					getStart(void);
+		bool					getLimitUserMod(void);
+		int						getUserLimit();
+		std::vector<Client *>	getList(void);
+		std::string				getNicks(void);
+
+		void					addClient(Client *client);
+		void					removeClient(Client *client);
+		void					removeClient(std::string target);
 		void					addUserMod(Client *target);
 		void					removeUserMod(Client *target);
 		void					removeUserMod(std::string target);
+		
 		bool					is_user_mod(Client *target);
 		bool					is_user(std::string nick);
-		std::string				getNicks(void);
 
-		bool					getStart(void);
-		void					setStart(bool start);
 
-		bool					getInviteOnly(void);
-		void					setInviteOnly(bool invite_only);
-
-		bool					getTopicMod(void);
-		void					setTopicMod(bool topic_mod);
-
-		bool					getPasswd(void);
-		std::string				getpass(void);
-		void					setPasswd(std::string passwd);
-		void					setHasPasswd(bool has_passwd);
-
-		bool					getLimitUserMod(void);
-		int						getUserLimit();
-		void					setUserLimit(int limit_user_mod);
-		void					setLimitUserMod(bool limit_user_mod);
-
-		std::vector<Client *>	getList(void);
 		bool					isListed(std::string nick);
 		void					addList(Client *client);
 		void					removeList(Client *client);
