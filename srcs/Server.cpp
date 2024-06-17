@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/15 17:35:59 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 14:27:09 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,6 +185,19 @@ void Server::receiveData(int fd)
 		{
 			for (size_t i = 0; i < _channels.size(); i++)
 			{
+				std::vector<Client *> lst = getChannels()[i]->getUserList();
+				for (size_t j = 0; j != lst.size(); j++)
+				{
+					std::string msg = ":";
+					msg += _clients[clientIndex]->getNick();
+					msg += "!";
+					msg += _clients[clientIndex]->getUser();
+					msg += "@127.0.0.1 PART ";
+					msg += getChannels()[i]->getName();
+					msg += " :Leaving";
+					msg += "\r\n";
+					send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
+				}
 				_channels[i]->removeClient(_clients[clientIndex]);
 				_channels[i]->removeUserMod(_clients[clientIndex]);
 			}
@@ -261,6 +274,19 @@ int	Server::processCommand(std::string command, int fd)
 			{
 				for (size_t i = 0; i < _channels.size(); i++)
 				{
+					std::vector<Client *> lst = getChannels()[i]->getUserList();
+					for (size_t j = 0; j != lst.size(); j++)
+					{
+						std::string msg = ":";
+						msg += _clients[clientIndex]->getNick();
+						msg += "!";
+						msg += _clients[clientIndex]->getUser();
+						msg += "@127.0.0.1 PART ";
+						msg += getChannels()[i]->getName();
+						msg += " :Leaving";
+						msg += "\r\n";
+						send(lst[j]->get_fd(), msg.c_str(), msg.size(), 0);
+					}
 					_channels[i]->removeClient(_clients[clientIndex]);
 					_channels[i]->removeUserMod(_clients[clientIndex]);
 				}
@@ -486,18 +512,6 @@ void Server::freeChannels()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 //DEBUG PURPOSE
 
 void Server::printState()
@@ -526,8 +540,6 @@ void Server::printState()
         {
             std::cout << BLACK << getCurrentTime() << "    " << "Channel name: " << _channels[i]->getName() << std::endl;
             std::cout << BLACK << getCurrentTime() << "    " << "Channel topic: " << _channels[i]->getTopic() << std::endl;
-            // std::cout << BLACK << getCurrentTime() << "    " << "Channel user limit: " << _channels[i]->getUserLimit() << std::endl;
-            // std::cout << BLACK << getCurrentTime() << "    " << "Channel private: " << _channels[i]->getPrivate() << std::endl;
             for (size_t i = 0; i < getChannels().size(); i++)
             {
                 std::vector<Client *> lst = getChannels()[i]->getUserList();
