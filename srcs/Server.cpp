@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/17 14:27:09 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 15:48:33 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,9 +41,6 @@ Server &Server::operator=(Server const &rhs)
 //===========================================================================================
 
 /**
- * @brief: Create a socket and bind it to the server
-*/
-/**
  * @brief: Start the server
 */
 void Server::start()
@@ -72,6 +69,9 @@ void Server::start()
 	freeClients(); // free the clients
 }
 
+/**
+ * @brief: Create a socket and bind it to the server
+*/
 void Server::socketCreation()
 {
 	struct sockaddr_in serverAddr; // create a sockaddr_in struct
@@ -169,6 +169,7 @@ void Server::acceptClient()
 
 /**
  * @brief: Receive data from the client
+ * @param fd: the file descriptor of the client
 */
 void Server::receiveData(int fd)
 {
@@ -238,17 +239,11 @@ void Server::receiveData(int fd)
 	}
 }
 
-
-Client *Server::getClient(std::string nick)
-{
-	for (std::vector<Client *>::iterator itr = _clients.begin(); itr != _clients.end(); ++itr)
-	{
-		if ((*itr)->getNick() == nick)
-			return (*itr);
-	}
-	return (NULL);
-}
-
+/**
+ * @brief: Process the command received from the client
+ * @param command: the command received
+ * @param fd: the file descriptor of the client
+*/
 int	Server::processCommand(std::string command, int fd)
 {
 	std::istringstream iss(command);
@@ -293,62 +288,19 @@ int	Server::processCommand(std::string command, int fd)
 				_clients[clientIndex]->setAlreadyInChannel(false);
 			}
 			std::cout << BLACK << getCurrentTime() << "    " << RED << "Client " << fd - 3 << " disconnected" << RESET << std::endl;
-			// clearClients(fd);
-			// close(fd);
-			// delete _clients[clientIndex];
 			return 2;
 		}
 	}
 	return 0;
 }
 
+
 //===========================================================================================
 //======================================UTILS SERV PART======================================
 //===========================================================================================
 
-
-int Server::clientExistNick(std::string nick)
-{
-	if (nick.empty())
-		return (-1);
-	for (size_t i = 0; i < _clients.size(); i++)
-	{
-		if (_clients[i]->getNick() == nick)
-		{
-			return (i);
-		}
-	}
-	return (-1);
-}
-
 /**
- * @brief: Remove the client from the pollfd vector and the client vector
-*/
-void Server::clearClients(int fd)
-{
-	//Remove the client from the pollfd vector
-	for (size_t i = 0; i < _fds.size(); i++)
-	{
-		if (_fds[i].fd == fd)
-		{
-			_fds.erase(_fds.begin() + i);
-			break;
-		}
-	}
-
-	//Remove the client from the client vector
-	for (size_t i = 0; i < _clients.size(); i++)
-	{
-		if (_clients[i]->get_fd() == fd)
-		{
-			_clients.erase(_clients.begin() + i);
-			break;
-		}
-	}
-}
-
-/**
- * @brief: close all clients (fds) and the server socket (fd != -1)
+ * @brief: close all clients (fds) and the server socket
 */
 void	Server::closeFds()
 {
@@ -367,7 +319,6 @@ void	Server::closeFds()
 */
 void Server::signalHandler(int signal)
 {
-	(void)signal;
 	if (signal == SIGINT)
 		std::cout << BLACK << getCurrentTime() << "    " << RED << "ctrl + C received" << RESET << std::endl;
 	else if (signal == SIGQUIT)
@@ -375,54 +326,11 @@ void Server::signalHandler(int signal)
 	_signal = true;
 }
 
-int Server::clientExistFd(int fd)
-{
-	for (size_t i = 0; i < _clients.size(); i++)
-	{
-		if (_clients[i]->get_fd() == fd)
-		{
-			return (i);
-		}
-	}
-	return (-1);
-}
-
-int Server::clientExistString(std::string name)
-{
-	if (name.empty())
-		return (-1);
-	for (size_t i = 0; i < _clients.size(); i++)
-	{
-		if (_clients[i]->getNick() == name)
-		{
-			return (i);
-		}
-	}
-	return (-1);
-}
-
-std::vector<std::string> handleLogin(std::string &buffer)
-{
-	std::vector<std::string> parts;
-	size_t pos = 0;
-	while ((pos = buffer.find("\n")) != std::string::npos)
-	{
-		std::string part = buffer.substr(0, pos);
-		std::istringstream iss(part);
-		std::string cmd;
-		iss >> cmd;
-		if (cmd != "CAP")
-			parts.push_back(part);
-		buffer.erase(0, pos + 1);
-	}
-	if (!buffer.empty())
-	{
-		parts.push_back(buffer);
-	}
-	return parts;
-}
-
-
+/**
+ * @brief: Handle the command received from the client
+ * @param command the command to handle
+ * @return the parts of the command
+*/
 std::vector<std::string>	Server::handleExecCommand(std::string &command)
 {
 	std::vector<std::string> result;
@@ -439,11 +347,111 @@ std::vector<std::string>	Server::handleExecCommand(std::string &command)
 	return result;
 }
 
+std::string Server::getPassword()
+{
+	return (_password);
+}
+
+//=============CLIENT PART==================
+
+/**
+ * @brief: Get the client from the client vector with the nick
+ * @param nick: the nick of the client
+ * @return: the client if found, NULL otherwise
+*/
+Client *Server::getClient(std::string nick)
+{
+	for (std::vector<Client *>::iterator itr = _clients.begin(); itr != _clients.end(); ++itr)
+	{
+		if ((*itr)->getNick() == nick)
+			return (*itr);
+	}
+	return (NULL);
+}
+
+/**
+ * @brief: Remove the client from the pollfd vector and the client vector
+*/
+void Server::clearClients(int fd)
+{
+	for (size_t i = 0; i < _fds.size(); i++)
+	{
+		if (_fds[i].fd == fd)
+		{
+			_fds.erase(_fds.begin() + i);
+			break;
+		}
+	}
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->get_fd() == fd)
+		{
+			_clients.erase(_clients.begin() + i);
+			break;
+		}
+	}
+}
+/**
+ * @brief: Check if the nick already exists
+ * @param nick the nick to check
+ * @return the index of the client if found, -1 otherwise
+*/
+int Server::clientExistNick(std::string nick)
+{
+	if (nick.empty())
+		return (-1);
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->getNick() == nick)
+		{
+			return (i);
+		}
+	}
+	return (-1);
+}
+
+/**
+ * @brief: Check if the fd already exists
+ * @param fd the fd to check
+ * @return the index of the client if found, -1 otherwise
+*/
+int Server::clientExistFd(int fd)
+{
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->get_fd() == fd)
+		{
+			return (i);
+		}
+	}
+	return (-1);
+}
+
+std::vector<Client *> Server::getClients()
+{
+	return (_clients);
+}
+
+void Server::freeClients()
+{
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		delete _clients[i];
+	}
+}
+
+//===============CHANNEL PART================
+
 void Server::addChannel(Channel *channel)
 {
 	_channels.push_back(channel);
 }
 
+/**
+ * @brief: Get the index of the channel
+ * @param name the name of the channel
+ * @return the index of the channel if found, -1 otherwise
+*/
 int	Server::channelIdx(std::string name)
 {
 	for (size_t i = 0; i < _channels.size(); i++)
@@ -454,6 +462,11 @@ int	Server::channelIdx(std::string name)
 	return (-1);
 }
 
+/**
+ * @brief: Check if the channel exists
+ * @param name the name of the channel
+ * @return 1 if the channel exists, 0 otherwise
+*/
 int Server::channelExist(std::string name)
 {
 	if (name.length() == 1)
@@ -466,7 +479,11 @@ int Server::channelExist(std::string name)
 	return (0);
 }
 
-
+/**
+ * @brief: Get the channel from the server
+ * @param name the name of the channel
+ * @return the channel if found, NULL otherwise
+*/
 Channel *Server::getChannel(std::string name)
 {
 	for (size_t i = 0; i != _channels.size(); i++)
@@ -479,27 +496,9 @@ Channel *Server::getChannel(std::string name)
 	return NULL;
 }
 
-std::vector<Client *> Server::getClients()
-{
-	return (_clients);
-}
-
 std::vector<Channel *> Server::getChannels()
 {
 	return (_channels);
-}
-
-std::string Server::getPassword()
-{
-	return (_password);
-}
-
-void Server::freeClients()
-{
-	for (size_t i = 0; i < _clients.size(); i++)
-	{
-		delete _clients[i];
-	}
 }
 
 void Server::freeChannels()
@@ -509,8 +508,6 @@ void Server::freeChannels()
 		delete _channels[i];
 	}
 }
-
-
 
 //DEBUG PURPOSE
 

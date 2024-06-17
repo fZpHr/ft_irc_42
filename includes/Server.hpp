@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/15 14:43:25 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 16:31:11 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,41 +25,33 @@ class Server
 		Server(int port, std::string password);
 		~Server();
 
+		//SERVER
 		void start();
 		void socketCreation();
 		void acceptClient();
 		void receiveData(int fd);
 		void addChannel(Channel *channel);
-
 		static void signalHandler(int signal);
-
 		std::vector<std::string>	handleExecCommand(std::string &command);
-
+		int	processCommand(std::string command, int fd);
+		std::string getPassword();
 		void closeFds();
-		void clearClients(int fd);
 
-		int channelExist(std::string name);
-		int channelIdx(std::string name);
+		//CLIENT
 		int clientExistFd(int fd);
 		int clientExistNick(std::string nick);
-		int clientExistString(std::string name);
-
 		std::vector<Client *> getClients();
+		Client *getClient(std::string nick);
+		void clearClients(int fd);
+		void freeClients();
+
+		//CHANNEL
 		std::vector<Channel *> getChannels();
 		Channel *getChannel(std::string name);
-		
-
-		void checkLogin(Client *client, int fd);
-		Client *getClient(std::string nick);
-
-		int	processCommand(std::string command, int fd);
-
-		std::string getPassword();
-
-		void freeClients();
+		int channelExist(std::string name);
+		int channelIdx(std::string name);
 		void freeChannels();
 		
-
 		//DEBUG PURPOSE
 		void printState();
 	

@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/13 18:29:14 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 16:44:49 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # ifndef DEBUG
 # define DEBUG	0
 #endif
+
 /**
  * all the includes needed for the project
 */
@@ -80,12 +81,17 @@
 #define BRESET "\033[1;0m"
 
 
+/**
+ * regex defines
+*/
+#define REGEXNICKNAME "^[a-zA-Z][a-zA-Z0-9_.-]{0,8}$"
+
+
 # include "Server.hpp"
 # include "Client.hpp"
 # include "Channel.hpp"
 # include "error.hpp"
 # include "response.hpp"
-# include "regex.hpp"
 
 // Parsing
 int handle_input(int ac, char **av);

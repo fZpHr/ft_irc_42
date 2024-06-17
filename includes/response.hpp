@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/06 14:58:56 by cpeterea          #+#    #+#             */
-/*   Updated: 2024/06/06 18:23:18 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 16:44:11 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,4 +25,5 @@
 # define RPL_INVITING(input, nick, chan)			"341 " + input + " " + nick + " " + chan
 # define RPL_NAMREPLY(input, chan, nicks)			"353 " + input + " = " + chan + " :" + nicks
 # define RPL_ENDOFNAMES(input, chan)				"366 " + input + " " + chan + " :End of /NAMES list"
+
 #endif

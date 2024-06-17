@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/15 15:10:12 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 15:21:32 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,6 @@ int main(int ac, char **av)
 		signal(SIGINT, Server::signalHandler); // CTRL + C (add signalHandler to handle the signal)
 		signal(SIGQUIT, Server::signalHandler); // CTRL + \ (add signalHandler to handle the signal)
 
-		// channel->setUserLimit(50);
-		// channel->setPrivate(false);
 		server.start(); 
 	}
 	catch(const std::exception& e)

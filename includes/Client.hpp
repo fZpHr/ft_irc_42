@@ -6,7 +6,7 @@
 /*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:48:40 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/15 15:05:55 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 16:30:46 by hbelle           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class Client
 		Client(Server *server);
 		~Client();
 
+		//GETTER & SETTER
 		int				get_fd() const;
 		void			set_fd(int fd);
 		std::string		get_IPclient() const;
@@ -33,7 +34,14 @@ class Client
 		std::string		getNick();
 		int				setPerms(bool trueFalse);
 		bool			getPerms();
+		int				setPassword(std::string command);
+		bool			getPassword();
+		void			setRegistered(bool registered);
+		bool			getRegistered();
+		void			setAlreadyInChannel(bool alreadyInChannel);
+		bool			getAlreadyInChannel();
 
+		//COMMANDS
 		int				prvMsg(std::string input);
 		int				joinChan(std::string target);
 		int 			kickChan(std::string args);
@@ -42,22 +50,11 @@ class Client
 		int				modChan(std::string target);
 		int				topic(std::string target);
 
-		int				setPassword(std::string command);
-		bool			getPassword();
-
-		void			receiveMsg(std::string msg);
+		//UTILS
+		int				handleAddMode(std::string mode, std::string channel, std::string argument);
+		int				handleRemoveMode(std::string mode, std::string channel, std::string argument);
 		void			sendMsg(std::string msg);
-
-		void			setRegistered(bool registered);
-		bool			getRegistered();
-
-		int			handleAddMode(std::string mode, std::string channel, std::string argument);
-		int			handleRemoveMode(std::string mode, std::string channel, std::string argument);
-
-		void		setAlreadyInChannel(bool alreadyInChannel);
-		bool		getAlreadyInChannel();
-
-
+		void			receiveMsg(std::string msg);
 	
 	private:
 		Client();
@@ -72,7 +69,6 @@ class Client
 		bool			_password;
 		bool			_registered;
 		bool			_alreadyInChannel;
-	
 };
 
 #endif
