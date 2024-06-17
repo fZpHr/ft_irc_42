@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:28:02 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/17 17:21:01 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/17 17:36:51 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -409,7 +409,10 @@ void Bot::connect(const std::string &address, const std::string &port, const std
  */
 void Bot::createSocket() {
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        close(sockfd);
         throw std::runtime_error("Socket creation error");
+    }
 }
 
 /**
@@ -430,11 +433,13 @@ void Bot::setupAddressStruct(const std::string &address, const std::string &port
     std::stringstream ss(port);
     int portNumber;
     if (!(ss >> portNumber)) {
+        close(sockfd);
         throw std::runtime_error("Invalid port number");
     }
     serv_addr.sin_port = htons(portNumber);
 
     if (inet_pton(AF_INET, address.c_str(), &serv_addr.sin_addr) <= 0) {
+        close(sockfd);
         throw std::runtime_error("Invalid address/ Address not supported");
     }
 }
