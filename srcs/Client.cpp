@@ -361,6 +361,21 @@ int Client::topic(std::string target)
 		sendMsg(ERR_NOSUCHCHANNEL(_nickname, channel));
 		return 1;
 	}
+	if (chan->is_user_mod(this) == false)
+	{
+		if (chan->getTopicMod() == true)
+		{
+			std::string msg = ":";
+			msg += "localhost 482 ";
+			msg += _username;
+			msg += " ";
+			msg += channel;
+			msg += " :You are'nt channel operator";
+			msg += "\r\n";
+			send(_clientFd, msg.c_str(), msg.size(), 0);
+			return 1;
+		}
+	}
 	if (arguments.empty())
 	{
 		if (chan->getTopic().empty())
