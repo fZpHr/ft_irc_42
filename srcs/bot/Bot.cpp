@@ -6,7 +6,7 @@
 /*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/10 17:28:02 by bberkrou          #+#    #+#             */
-/*   Updated: 2024/06/13 01:57:56 by cpeterea         ###   ########.fr       */
+/*   Updated: 2024/06/17 17:21:01 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -402,7 +402,7 @@ void Bot::connect(const std::string &address, const std::string &port, const std
 
 /**
  * @brief Creates a socket for connecting to the server.
- * 
+ * f
  * Initializes a socket using IPv4 and TCP. Throws an exception if the socket creation fails.
  * 
  * @throws std::runtime_error If socket creation fails.
@@ -451,7 +451,10 @@ void Bot::setupAddressStruct(const std::string &address, const std::string &port
  */
 void Bot::connectToServer(struct sockaddr_in &serv_addr) {
     if (::connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        close(sockfd);
         throw std::runtime_error("Connection Failed");
+    }
 }
 
 /**
