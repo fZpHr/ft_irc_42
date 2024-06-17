@@ -252,6 +252,14 @@ int	Client::joinChan(std::string target)
 		return 1;
 	}
 	Channel *chan = _server->getChannel(argument);
+	if (chan && chan->getLimitUserMod() == true)
+	{
+		if (static_cast<unsigned long>(chan->getUserLimit()) >= chan->getUserClient().size())
+		{
+			sendMsg(ERR_CHANNELISFULL(_nickname, argument));
+			return 1;
+		}
+	}
 	if (chan && chan->getInviteOnly())
 	{
 		if (chan->isListed(getNick()))

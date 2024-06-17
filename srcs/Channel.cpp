@@ -222,6 +222,17 @@ void					Channel::setUserLimit(int limit_user_mod)
 }
 
 
+int						Channel::getUserLimit()
+{
+	return (_user_limit);
+}
+
+
+std::vector<Client *>	Channel::getUserClient(void)
+{
+	return (_userList);
+}
+
 std::vector<Client *>	Channel::getList(void)
 {
 	return (_invited);

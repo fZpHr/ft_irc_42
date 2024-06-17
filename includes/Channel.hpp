@@ -29,9 +29,10 @@ class Channel
 		void			removeClient(Client *client);
 		void			removeClient(std::string target);
 		Client			*getClient(std::string str);
+		
 		std::vector<Client *>	getUserList(void);
 		std::vector<Client *>	getUserMod(void);
-		
+		std::vector<Client *>	getUserClient(void);
 		void					addUserMod(Client *target);
 		void					removeUserMod(Client *target);
 		void					removeUserMod(std::string target);
@@ -54,6 +55,7 @@ class Channel
 		void					setHasPasswd(bool has_passwd);
 
 		bool					getLimitUserMod(void);
+		int						getUserLimit();
 		void					setUserLimit(int limit_user_mod);
 		void					setLimitUserMod(bool limit_user_mod);
 
