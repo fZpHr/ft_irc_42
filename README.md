@@ -91,7 +91,7 @@ Launcht it
 
 ## USAGE
 
-To communicate with the bot, send a private message to it using the following command format:
+To communicate with the bot, send it a private message using the following command format, it will then send you instructions to get started:
 ```
 PRIVMSG botnick <message>
 ```
