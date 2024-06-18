@@ -1,4 +1,4 @@
-## This project involved collaboration, and my teammate was https://github.com/Luzog78
+## This project involved collaboration, and my teammate was https://github.com/eyJvcy and https://github.com/BenjaminBerkrouber
 
 
 ## FT_IRC
