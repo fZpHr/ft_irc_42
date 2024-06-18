@@ -26,9 +26,9 @@ Finally, launch the server with:
 
 ## USAGE
 
-Connect to the server using any IRC client, for example:
+Connect to the server using any IRC client, such as Netcat:
 ```
-/connect localhost <port> <password>
+/nc localhost <port> <password>
 ```
 Then authentifcate yourself in the server:
 
@@ -37,7 +37,7 @@ PASS <password>
 NICK <nick>
 USER <user> * * :<realname>
 ```
-Once you are authentificated, you can use the following commands:
+Once you are authenticated, you can use the following commands:
 
 Join a channel:
 ```
