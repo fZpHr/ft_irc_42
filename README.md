@@ -74,3 +74,24 @@ Change the channel mode (i for invite, t for topic restricted, k for password, i
 ```
 MODE #<channel_name> [+|-]<mode> [<mode_params>]
 ```
+
+## Bonus (bot client)
+Bot client with a tic tac toe game, playing against a IA
+## Installation
+
+
+Compile bot
+```bash
+make bot
+```
+Launcht it
+```
+./bot localhost <port>
+```
+
+## USAGE
+
+To communicate with the bot, send a private message to it using the following command format:
+```
+PRIVMSG botnick <message>
+```
