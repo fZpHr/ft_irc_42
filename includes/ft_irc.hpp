@@ -3,22 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   ft_irc.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 14:56:50 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/17 16:44:49 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 18:04:13 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_IRC_HPP
 # define FT_IRC_HPP
-
-/**
- * For debug purposes, change the value to 1 with the following command: make debug
-*/
-# ifndef DEBUG
-# define DEBUG	0
-#endif
 
 /**
  * all the includes needed for the project

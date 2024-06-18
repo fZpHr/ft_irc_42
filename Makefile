@@ -74,9 +74,4 @@ re:	fclean all
 
 re_bot:	fclean_bot bot
 
-debug: fclean
-debug: STD = -std=c++11
-debug: CXXFLAGS += -D DEBUG=1
-debug: all
-
-.PHONY: all clean fclean re debug
+.PHONY: all clean fclean re bot re_bot 

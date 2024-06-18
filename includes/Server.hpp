@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:50:32 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/17 16:31:11 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 18:03:50 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,9 +51,6 @@ class Server
 		int channelExist(std::string name);
 		int channelIdx(std::string name);
 		void freeChannels();
-		
-		//DEBUG PURPOSE
-		void printState();
 	
 	private:
 		Server();

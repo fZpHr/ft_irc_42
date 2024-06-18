@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbelle <hbelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cpeterea <cpeterea@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 16:52:02 by hbelle            #+#    #+#             */
-/*   Updated: 2024/06/17 15:48:33 by hbelle           ###   ########.fr       */
+/*   Updated: 2024/06/17 18:03:36 by cpeterea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -508,48 +508,3 @@ void Server::freeChannels()
 		delete _channels[i];
 	}
 }
-
-//DEBUG PURPOSE
-
-void Server::printState()
-{
-	std::cout << BLACK << getCurrentTime() << "    " << "Clients: " << _clients.size() << std::endl;
-	std::cout << BLACK << getCurrentTime() << "    " << GREEN << "-----------" << RESET << std::endl;
-	if (_clients.size() > 0)
-	{
-		for (size_t i = 0; i < _clients.size(); i++)
-		{
-			std::cout << BLACK << getCurrentTime() << "    " << "Client nick: " << _clients[i]->getNick() << std::endl;
-			std::cout << BLACK << getCurrentTime() << "    " << "Client user: " << _clients[i]->getUser() << std::endl;
-			std::cout << BLACK << getCurrentTime() << "    " << "Client fd: " << _clients[i]->get_fd() << std::endl;
-			std::cout << BLACK << getCurrentTime() << "    " << "Client IP: " << _clients[i]->get_IPclient() << std::endl;
-			std::cout << BLACK << getCurrentTime() << "    " << "Client perms: " << _clients[i]->getPerms() << std::endl;
-			if (i < _clients.size() - 1)
-				std::cout << BLACK << getCurrentTime() << "    " << GREEN << "-----------" << RESET << std::endl;
-		}
-	}
-	std::cout << BLACK << getCurrentTime() << "    " << YELLOW << "------------------------" << RESET << std::endl;
-	std::cout << BLACK << getCurrentTime() << "    " << "Channels: " << _channels.size() << std::endl;
-	std::cout << BLACK << getCurrentTime() << "    " << GREEN << "-----------" << RESET << std::endl;
-    if (_channels.size() > 0)
-    {
-        for (size_t i = 0; i < _channels.size(); i++)
-        {
-            std::cout << BLACK << getCurrentTime() << "    " << "Channel name: " << _channels[i]->getName() << std::endl;
-            std::cout << BLACK << getCurrentTime() << "    " << "Channel topic: " << _channels[i]->getTopic() << std::endl;
-            for (size_t i = 0; i < getChannels().size(); i++)
-            {
-                std::vector<Client *> lst = getChannels()[i]->getUserList();
-                for (size_t j = 0; j != lst.size(); j++)
-                {
-                    std::cout << BLACK << getCurrentTime() << "    " << "Client nick: " << lst[j]->getNick() << std::endl;
-                }
-            }
-            if (i < _channels.size() - 1)
-                std::cout << BLACK << getCurrentTime() << "    " << GREEN << "-----------" << RESET << std::endl;
-        }
-    }
-}
-
-
-
